@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'home.dart';
 import 'register.dart';
 import 'package:cornaro/theme.dart';
+import 'package:flutter/services.dart';
 
 /* class AppColors {
   static const primary = Color(0xff0a45ac);
@@ -15,6 +16,7 @@ import 'package:cornaro/theme.dart';
 InputDecoration modernInput(String label) {
   return InputDecoration(
     labelText: label,
+    hintStyle: TextStyle(color: AppColors.red),
     labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
     filled: true,
     fillColor: AppColors.bgGrey,
@@ -42,7 +44,7 @@ Widget modernButton(String text, bool loading, VoidCallback onTap) {
       onPressed: loading ? null : onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: Color(0xfff4f4f6),
+        foregroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -57,7 +59,7 @@ Widget modernButton(String text, bool loading, VoidCallback onTap) {
             )
           : Text(
               text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
     ),
   );
@@ -69,13 +71,31 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
   @override
   State<LoginPage> createState() => _LoginPageState();
+  
 }
 
 class _LoginPageState extends State<LoginPage> {
   final _schoolEmailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool loading = false;
-  bool _obscurePassword = true; 
+  bool _obscurePassword = true;
+
+  /* @override
+  void initState() {
+    super.initState();
+    
+    currentTheme = "light";
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: AppColors.bgGrey,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: AppColors.bgGrey,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+  } */
+
 
   Future<void> _login() async {
     setState(() => loading = true);
@@ -119,7 +139,12 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff4f4f6),
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -127,10 +152,10 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+                Center(
                 child: Text(
                   "Accedi",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.text),
                 ),
               ),
               const SizedBox(height: 20),
@@ -138,12 +163,14 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _schoolEmailController,
                 cursorColor: AppColors.primary,
                 decoration: modernInput("Email scolastica"),
+                style: TextStyle(color: AppColors.text),
               ),
               const SizedBox(height: 14),
               TextField(
                 cursorColor: AppColors.primary,
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                style: TextStyle(color: AppColors.text),
                 decoration: modernInput("Password").copyWith(
                   suffixIcon: IconButton(
                     icon: Icon(

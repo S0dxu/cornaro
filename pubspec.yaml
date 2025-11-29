@@ -72,6 +72,7 @@ flutter:
   assets:
     - assets/icons/appunti/
     - assets/icons/libri/
+    - assets/icons/mockup/
     - assets/icons/images/
     - assets/icons/
     - assets/icons/x/

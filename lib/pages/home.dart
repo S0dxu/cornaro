@@ -31,7 +31,6 @@ import 'package:cornaro/theme.dart';
 
 ValueNotifier<String> themeNotifier = ValueNotifier(currentTheme);
 
-
 final storage = FlutterSecureStorage();
 
 class HomePage extends StatefulWidget {
@@ -90,7 +89,7 @@ class _HomePageState extends State<HomePage> {
           height: isAddButton ? 28 : 24,
           width: isAddButton ? 28 : 24,
           colorFilter: ColorFilter.mode(
-            isSelected ? AppColors.primary : AppColors.text,
+            isSelected ? AppColors.primary : AppColors.text.withOpacity(0.85),
             BlendMode.srcIn,
           ),
         ),
@@ -113,7 +112,7 @@ class _HomePageState extends State<HomePage> {
               border: Border(
                 top: BorderSide(
                   color: AppColors.borderGrey,
-                  width: 1,
+                  width: 0.5,
                 ),
               ),
             ),
@@ -128,10 +127,10 @@ class _HomePageState extends State<HomePage> {
               type: BottomNavigationBarType.fixed,
               items: [
                 _bottomNavItem("assets/icons/home.svg", "Home", _selectedIndex == 0),
-                _bottomNavItem("assets/icons/chat-round-svgrepo-com.svg", "Chat", _selectedIndex == 1),
+                _bottomNavItem("assets/icons/spot.svg", "Spot", _selectedIndex == 1),
                 _bottomNavItem("assets/icons/plus-circle-svgrepo-com.svg", "", _selectedIndex == 2),
                 _bottomNavItem("assets/icons/book-svgrepo-com (1).svg", "Shop", _selectedIndex == 3),
-                _bottomNavItem("assets/icons/gift.svg", "Promo", _selectedIndex == 4),
+                _bottomNavItem("assets/icons/present.svg", "Promo", _selectedIndex == 4),
               ],
             ),
           ),
@@ -581,37 +580,93 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ],
                     );
                   }),
+                  /* Image.asset(
+                    "assets/icons/ads1.png",
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ), */
+                  Image.asset(
+                    "assets/icons/ads2.png",
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
                 ],
               ),
             ),
           ),
-          Container(
-            height: 140,
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 30),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
+          Material(
+            color: AppColors.primary,
+            shape: ContinuousRectangleBorder(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(70),
+                bottomRight: Radius.circular(70),
               ),
             ),
-            child: Column(
-              children: [
-                const SizedBox(height: 26),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+            child: Container(
+              height: 140,
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 30),
+              child: Column(
+                children: [
+                  const SizedBox(height: 26),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: AppColors.contrast.withOpacity(0.2),
-                            backgroundImage: widget.profileImage.isNotEmpty
-                                ? NetworkImage(widget.profileImage)
-                                : AssetImage("assets/icons/profile.png") as ImageProvider,
+                          GestureDetector(
+                            onTap: () {
+                              showGeneralDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Close",
+                                barrierColor: AppColors.text.withOpacity(0.05),
+                                transitionDuration: const Duration(milliseconds: 200),
+                                pageBuilder: (_, __, ___) {
+                                  final double size = MediaQuery.of(context).size.width - 80;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: Center(
+                                        child: GestureDetector(
+                                          onTap: () {},
+                                          child: ClipOval(
+                                            child: Container(
+                                              width: size,
+                                              height: size,
+                                              color: AppColors.bgGrey,
+                                              child: InteractiveViewer(
+                                                child: widget.profileImage.isNotEmpty
+                                                    ? Image.network(
+                                                        widget.profileImage,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.asset(
+                                                        "assets/icons/profile.png",
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 28,
+                              backgroundColor: AppColors.contrast.withOpacity(0.2),
+                              backgroundImage: widget.profileImage.isNotEmpty
+                                  ? NetworkImage(widget.profileImage)
+                                  : const AssetImage("assets/icons/profile.png") as ImageProvider,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Column(
@@ -666,7 +721,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ],
             ),
           ),
-        ],
+      )],
       ),
     );
   }

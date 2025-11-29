@@ -130,12 +130,15 @@ class PromoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: AppColors.bgGrey,
-        statusBarIconBrightness: Brightness.light,
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
       ),
-      child: Column(
+      body: Column(
         children: [
           Expanded(
             child: Padding(

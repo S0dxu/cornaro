@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cornaro/theme.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -66,16 +67,25 @@ class _AddPageState extends State<AddPage> {
       margin: EdgeInsets.only(top: index == 0 ? 16 : 0),
       padding: const EdgeInsets.only(top: 14, bottom: 14, left: 14, right: 20),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+        border: Border(bottom: BorderSide(color: AppColors.borderGrey)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const CircleAvatar(
-                radius: 18,
-                backgroundImage: AssetImage("assets/icons/profile.png"),
+              Container(
+                width: 42,
+                height: 42,
+                color: AppColors.bgGrey,
+                child: SvgPicture.asset(
+                  "assets/icons/profile-user-svgrepo-com.svg",
+                  colorFilter: ColorFilter.mode(
+                    AppColors.text,
+                    BlendMode.srcIn,
+                  ),
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -92,21 +102,22 @@ class _AddPageState extends State<AddPage> {
                             children: [
                               Text(
                                 post["author"],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
+                                  color: AppColors.text,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 "· ${post["time"]}",
-                                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                style: TextStyle(color: AppColors.text.withOpacity(0.75), fontSize: 14),
                               ),
                             ],
                           ),
                         ),
-                        Icon(Icons.more_horiz, color: Colors.grey[700], size: 20),
+                        Icon(Icons.more_horiz, color: AppColors.text.withOpacity(0.75), size: 20),
                       ],
                     ),
                     Text(
@@ -124,13 +135,13 @@ class _AddPageState extends State<AddPage> {
           ),
           const SizedBox(height: 8),
           Container(
-            margin: const EdgeInsets.only(left: 17),
+            margin: const EdgeInsets.only(left: 21),
             padding: const EdgeInsets.only(left: 27),
             decoration: BoxDecoration(
               border: Border(
                 left: BorderSide(
-                  color: Colors.grey[300]!,
-                  width: 1.5,
+                  color: AppColors.borderGrey,
+                  width: 1,
                 ),
               ),
             ),
@@ -175,50 +186,57 @@ class _AddPageState extends State<AddPage> {
 
           Row(
             children: [
-              const CircleAvatar(
-                radius: 18,
-                backgroundImage: AssetImage("assets/icons/profile.png"),
+              Container(
+                width: 42,
+                height: 42,
+                color: AppColors.bgGrey,
+                child: SvgPicture.asset(
+                  "assets/icons/profile-user-svgrepo-com.svg",
+                  colorFilter: ColorFilter.mode(
+                    AppColors.text,
+                    BlendMode.srcIn,
+                  ),
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Luca Barbata",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Text(
+                                "Luca Barbata",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
-                                Text(
-                                  " · 14min",
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                                ),
-                              ],
-                            ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                " · 14min",
+                                style: TextStyle(color: AppColors.text.withOpacity(0.75), fontSize: 14),
+                              ),
+                            ],
                           ),
-                          Icon(Icons.more_horiz, color: Colors.grey[700], size: 20)
-                        ],
-                      ),
-                      Text(
-                        "@lucabarbone",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400, fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                        ),
+                        Icon(Icons.more_horiz, color: AppColors.text.withOpacity(0.75), size: 20)
+                      ],
+                    ),
+                    Text(
+                      "@lucabarbone",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -259,12 +277,12 @@ class _AddPageState extends State<AddPage> {
         SvgPicture.asset(
           svgAsset,
           width: width,
-          color: Colors.grey[700],
+          color: AppColors.text.withOpacity(0.75),
         ),
         const SizedBox(width: 4),
         Text(
           count,
-          style: TextStyle(color: Colors.grey[700], fontSize: 13),
+          style: TextStyle(color: AppColors.text.withOpacity(0.75), fontSize: 13),
         ),
       ],
     );
@@ -273,14 +291,14 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
-     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Color(0xfff4f4f6),
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-    ));
     return Scaffold(
-
-      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
+      ),
       body: ListView.builder(
         itemCount: posts.length,
         itemBuilder: (_, i) => buildPost(posts[i], i),
@@ -306,11 +324,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
     List<String> comments = widget.post["commentsList"] ?? [];
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
-        elevation: 0,
-        forceMaterialTransparency: true,
-        backgroundColor: Color(0xfff4f4f6),
-        foregroundColor: Colors.black,
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
       ),
       body: Column(
         children: [
@@ -327,10 +346,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     children: [
                       Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 20,
-                            backgroundImage:
-                                AssetImage("assets/icons/profile.png"),
+                          Container(
+                            width: 42,
+                            height: 42,
+                            color: AppColors.bgGrey,
+                            child: SvgPicture.asset(
+                              "assets/icons/profile-user-svgrepo-com.svg",
+                              colorFilter: ColorFilter.mode(
+                                AppColors.text,
+                                BlendMode.srcIn,
+                              ),
+                              fit: BoxFit.contain,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Column(

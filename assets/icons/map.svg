@@ -1,7 +1,18 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-<g id="SVGRepo_iconCarrier"> <path d="M4 10.1433C4 5.64588 7.58172 2 12 2C16.4183 2 20 5.64588 20 10.1433C20 14.6055 17.4467 19.8124 13.4629 21.6744C12.5343 22.1085 11.4657 22.1085 10.5371 21.6744C6.55332 19.8124 4 14.6055 4 10.1433Z" stroke="#000" stroke-width="1.5"/> <circle cx="12" cy="10" r="3" stroke="#000" stroke-width="1.5"/> </g>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Map-Pin</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Map-Pin">
+            <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24">
+
+</rect>
+            <path d="M19,9.8 C19,13.7585 13.6628,18.581 12.3092,19.7405 C12.1299,19.894 11.8701,19.894 11.6908,19.7405 C10.3372,18.581 5,13.7585 5,9.8 C5,6.04446 8.13401,3 12,3 C15.866,3 19,6.04446 19,9.8 Z" id="Path" stroke="#0C0310" stroke-width="2" stroke-linecap="round">
+
+</path>
+            <circle id="Oval" stroke="#0C0310" stroke-width="2" stroke-linecap="round" cx="12" cy="10" r="2">
+
+</circle>
+        </g>
+    </g>
+</svg>

@@ -8,7 +8,7 @@ class AppColors {
 
   static Color get bgGrey =>
       currentTheme == "dark"
-          ? const Color(0xFF1d1d1d)
+          ? const Color(0xFF1c1d22)
           : const Color(0xFFF4F4F4);
 
   static Color get borderGrey =>
@@ -18,7 +18,7 @@ class AppColors {
 
   static Color get text =>
       currentTheme == "dark"
-          ? const Color(0xffeeeeee)
+          ? const Color(0xffc4c5ca)
           : Colors.black;
 
   static Color get contrast =>

@@ -611,7 +611,7 @@ class _AppuntiPageState extends State<AppuntiPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         child: SvgPicture.asset(
           'assets/icons/plus.svg',
-          color: AppColors.contrast,
+          color: AppColors.bgGrey,
           width: 26,
           height: 26,
         ),
@@ -622,105 +622,675 @@ class _AppuntiPageState extends State<AppuntiPage> {
   }
 }
 
-class RipetizioniPage extends StatelessWidget {
+class RipetizioniPage extends StatefulWidget {
   const RipetizioniPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> ripetizioni = [
-      {
-        'titolo': 'Ripetizioni di Matematica',
-        'materia': 'Matematica',
-        'livello': 'Superiori / Università',
-        'descrizione': 'Lezioni private di algebra, geometria e analisi 1.',
-        'docente': 'Elena Moretti',
-        'numero': '+39 333 112 2233',
-        'prezzo': '€20/h',
-      },
-      {
-        'titolo': 'Ripetizioni di Inglese',
-        'materia': 'Inglese',
-        'livello': 'Tutti i livelli',
-        'descrizione':
-            'Conversazione, grammatica e preparazione esami Cambridge.',
-        'docente': 'Marco Bianchi',
-        'numero': '+39 339 998 1122',
-        'prezzo': '€18/h',
-      },
-      {
-        'titolo': 'Ripetizioni di Fisica',
-        'materia': 'Fisica',
-        'livello': 'Liceo scientifico',
-        'descrizione': 'Spiegazioni personalizzate con esempi pratici.',
-        'docente': 'Giulia Rossi',
-        'numero': '+39 340 776 3344',
-        'prezzo': '€22/h',
-      },
-    ];
+  State<RipetizioniPage> createState() => _RipetizioniPageState();
+}
 
+class _RipetizioniPageState extends State<RipetizioniPage> {
+  final List<Map<String, dynamic>> ripetizioni = [
+    {
+      'titolo': 'Ripetizioni di Italiano',
+      'materia': 'Italiano / Latino',
+      'livello': 5,
+      'descrizione':
+          'Faccio lezioni di italiano, insegno come si scrivono temi efficaci e latino, lessico e grammatica.',
+      'prof': 'Giacomo Borille',
+      'numero': '+39 333 112 2233',
+      'prezzo': '20',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/jack.png',
+      'posizione': 'Padova',
+      'valutazione': 4.5,
+      'valutazioni': 24,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'posizione': 'Albignasego',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile2.png',
+      'posizione': 'Legnaro',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Matematica',
+      'materia': 'Matematica',
+      'livello': 5,
+      'descrizione': 'Lezioni private di algebra, geometria e analisi 1.',
+      'prof': 'Elena Moretti',
+      'numero': '+39 333 112 2233',
+      'prezzo': '20',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Padova',
+      'valutazione': 4.5,
+      'valutazioni': 24,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'posizione': 'Albignasego',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Legnaro',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Matematica',
+      'materia': 'Matematica',
+      'livello': 5,
+      'descrizione': 'Lezioni private di algebra, geometria e analisi 1.',
+      'prof': 'Elena Moretti',
+      'numero': '+39 333 112 2233',
+      'prezzo': '20',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Padova',
+      'valutazione': 4.5,
+      'valutazioni': 24,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Albignasego',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Legnaro',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Matematica',
+      'materia': 'Matematica',
+      'livello': 5,
+      'descrizione': 'Lezioni private di algebra, geometria e analisi 1.',
+      'prof': 'Elena Moretti',
+      'numero': '+39 333 112 2233',
+      'prezzo': '20',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Padova',
+      'valutazione': 4.5,
+      'valutazioni': 24,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Albignasego',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Legnaro',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Matematica',
+      'materia': 'Matematica',
+      'livello': 5,
+      'descrizione': 'Lezioni private di algebra, geometria e analisi 1.',
+      'prof': 'Elena Moretti',
+      'numero': '+39 333 112 2233',
+      'prezzo': '20',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Padova',
+      'valutazione': 4.5,
+      'valutazioni': 24,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Albignasego',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+    {
+      'titolo': 'Ripetizioni di Inglese',
+      'materia': 'Inglese',
+      'livello': 4,
+      'descrizione':
+          'Conversazione, grammatica e preparazione esami Cambridge.',
+      'prof': 'Marco Bianchi',
+      'numero': '+39 339 998 1122',
+      'prezzo': '18',
+      'mockup': 'assets/icons/mockup/matematica.png',
+      'profilo': 'assets/icons/profile.png',
+      'posizione': 'Legnaro',
+      'valutazione': 4.0,
+      'valutazioni': 18,
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
-        title: const Text(
-          'Ripetizioni',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
         backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.text),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 42,
+                decoration: BoxDecoration(color: AppColors.bgGrey),
+                child: TextField(
+                  onChanged: (value) {},
+                  style: TextStyle(color: AppColors.text),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: 'Cerca tutor',
+                    hintStyle: TextStyle(
+                      color: AppColors.text.withOpacity(0.65),
+                      fontSize: 16,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 9,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/search.svg',
+                        color: AppColors.text.withOpacity(0.65),
+                        width: 18,
+                        height: 18,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  barrierColor: AppColors.text.withOpacity(0.05),
+                  isScrollControlled: true,
+                  backgroundColor: AppColors.contrast,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  builder: (context) {
+                    return StatefulBuilder(
+                      builder: (context, setModalState) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.55,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+              child: Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: AppColors.bgGrey,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppColors.borderGrey.withOpacity(0.8),
+                        width: 1,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/filter.svg',
+                        color: AppColors.text.withOpacity(0.65),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+      body: ListView.separated(
         itemCount: ripetizioni.length,
+        separatorBuilder: (context, index) {
+          return Divider(color: AppColors.bgGrey, height: 0, thickness: 1);
+        },
         itemBuilder: (context, index) {
-          final ripetizione = ripetizioni[index];
+          final rep = ripetizioni[index];
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder:
-                      (_) => DettaglioItemPage(
-                        item: ripetizione,
-                        tipo: "Ripetizione",
-                      ),
+                  builder: (_) => DettaglioRipetizionePage(rep: rep),
                 ),
               );
             },
             child: Container(
-              margin: const EdgeInsets.only(bottom: 18),
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.contrast,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.text.withOpacity(0.05),
-                    blurRadius: 0,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                border: Border.all(
+                  color: AppColors.borderGrey.withOpacity(0.6),
+                  width: 1,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ripetizione['titolo'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12, right: 12, top: 14),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /* Material(
+                            color: AppColors.bgGrey,
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                            child: rep['profilo'] != null
+                              ? ClipPath(
+                                  clipper: ShapeBorderClipper(
+                                    shape: ContinuousRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  child: Image.asset(
+                                    rep['profilo'],
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: SvgPicture.asset(
+                                    "assets/icons/user-3-svgrepo-com.svg",
+                                    colorFilter: ColorFilter.mode(
+                                      AppColors.bgGrey,
+                                      BlendMode.srcIn,
+                                    ),
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                          ), */
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              color: AppColors.bgGrey,
+                              child:
+                                  rep['profilo'] != null
+                                      ? Image.asset(
+                                        rep['profilo'],
+                                        fit: BoxFit.cover,
+                                      )
+                                      : Padding(
+                                        padding: const EdgeInsets.all(6),
+                                        child: SvgPicture.asset(
+                                          "assets/icons/user-3-svgrepo-com.svg",
+                                          colorFilter: ColorFilter.mode(
+                                            AppColors.text,
+                                            BlendMode.srcIn,
+                                          ),
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            flex: 2,
+                            child: SizedBox(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "${rep['prof']}",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icons/star.svg',
+                                            width: 13,
+                                            height: 13,
+                                            colorFilter: ColorFilter.mode(
+                                              const Color(0xFFe6a823),
+                                              BlendMode.srcIn,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            rep['valutazione']?.toStringAsFixed(
+                                                  1,
+                                                ) ??
+                                                '0.0',
+                                            style: TextStyle(
+                                              color: const Color(0xFFe6a823),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            "(${rep['valutazioni'] ?? 0})",
+                                            style: TextStyle(
+                                              color: AppColors.text,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            "assets/icons/map.svg",
+                                            width: double.infinity,
+                                            height: 16,
+                                            colorFilter: ColorFilter.mode(
+                                              AppColors.text.withOpacity(0.85),
+                                              BlendMode.srcIn,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            rep['posizione'] ?? '',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: AppColors.text.withOpacity(
+                                                0.85,
+                                              ),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      /* Text(
+                                        "€${rep['prezzo']}/h",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 15,
+                                          color: AppColors.primary,
+                                        ),
+                                      ), */
+                                    ],
+                                  ),
+                                  /* Text(rep['descrizione'] ?? '',
+                                      style: TextStyle(
+                                        color: AppColors.text.withOpacity(0.65),
+                                        fontSize: 13,
+                                      ),
+                                  ), */
+                                  /* Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Text(
+                                      "€${rep['prezzo']}/h",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ), */
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    ripetizione['materia'],
-                    style: TextStyle(color: AppColors.text.withOpacity(0.65)),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Prezzo: ${ripetizione['prezzo']}",
-                    style: TextStyle(color: AppColors.text.withOpacity(0.8)),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFfbc877).withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: const Color(0xFFe6a823),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/university-svgrepo-com.svg',
+                                width: 16,
+                                height: 16,
+                                colorFilter: ColorFilter.mode(
+                                  AppColors.text,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                rep['materia'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColors.primary,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              /* SvgPicture.asset(
+                                'assets/icons/calendar-user-svgrepo-com.svg',
+                                width: 16,
+                                height: 16,
+                                colorFilter: ColorFilter.mode(
+                                  AppColors.contrast,
+                                  BlendMode.srcIn,
+                                ),
+                              ), */
+                              Text(
+                                "${rep['livello'].toString()}ª classe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Divider(
+                      color: AppColors.borderGrey.withOpacity(0.5),
+                      height: 1,
+                      thickness: 1,
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/dollar-sign-svgrepo-com.svg',
+                            width: 21,
+                            height: 21,
+                            colorFilter: ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "€${rep['prezzo']} / ora",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      rep['descrizione'] ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
             ),
           );
@@ -735,7 +1305,10 @@ class ShopPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> categories = ['Appunti', 'Libri Usati', 'Ripetizioni'];
+    final List<String> categories = [
+      /* 'Appunti',  */ 'Libri Usati',
+      'Ripetizioni',
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.bgGrey,
@@ -1388,7 +1961,7 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
                             child: Image.asset(
                               libro['immagine'],
                               width: double.infinity,
-                              height: itemHeight * 0.69,
+                              height: 290,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -1518,7 +2091,7 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         child: SvgPicture.asset(
           'assets/icons/plus.svg',
-          color: AppColors.contrast,
+          color: AppColors.bgGrey,
           width: 26,
           height: 26,
         ),
@@ -1559,13 +2132,13 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.contrast,
+        foregroundColor: AppColors.text,
       ),
       body: Column(
         children: [
           if (imagePath != null)
             Flexible(
-              flex: 60,
+              flex: 70,
               child: Stack(
                 children: [
                   Container(
@@ -1666,7 +2239,7 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                               ),
                             ),
                             Text(
-                              widget.item['classe'] + "ª classe" ?? '',
+                              (widget.item['classe'] ?? '') + "ª classe",
                               style: TextStyle(
                                 color: AppColors.text.withOpacity(0.65),
                               ),
@@ -1704,10 +2277,7 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                       ),
                       child: Text(
                         "Acquista",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.contrast,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
                   ),
@@ -1716,6 +2286,304 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DettaglioRipetizionePage extends StatelessWidget {
+  final Map<String, dynamic> rep;
+
+  const DettaglioRipetizionePage({super.key, required this.rep});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.text),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          rep['titolo'] ?? '',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        ),
+        centerTitle: true,
+      ),
+
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Material(
+                    color: AppColors.bgGrey,
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: rep['profilo'] != null
+                      ? ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                          ),
+                          child: Image.asset(
+                            rep['profilo'],
+                            width: 57,
+                            height: 57,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: SvgPicture.asset(
+                            "assets/icons/user-3-svgrepo-com.svg",
+                            colorFilter: ColorFilter.mode(
+                              AppColors.text,
+                              BlendMode.srcIn,
+                            ),
+                            width: 41,
+                            height: 41,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                  ),
+
+                  /* ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      color: AppColors.bgGrey,
+                      child: rep['profilo'] != null
+                          ? Image.asset(
+                              rep['profilo'],
+                              fit: BoxFit.cover,
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(0),
+                              child: SvgPicture.asset(
+                                "assets/icons/user-3-svgrepo-com.svg",
+                                colorFilter: ColorFilter.mode(
+                                  AppColors.text,
+                                  BlendMode.srcIn,
+                                ),
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                    ),
+                  ), */
+
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              rep['prof'] ?? '',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 17,
+                                color: AppColors.text,
+                              ),
+                            ),
+
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/star.svg',
+                                  width: 15,
+                                  height: 15,
+                                  colorFilter: const ColorFilter.mode(
+                                    Color(0xFFe6a823),
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  rep['valutazione']?.toStringAsFixed(1) ??
+                                      '0.0',
+                                  style: const TextStyle(
+                                    color: Color(0xFFe6a823),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "(${rep['valutazioni']})",
+                                  style: TextStyle(
+                                    color: AppColors.text.withOpacity(0.8),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/icons/map.svg",
+                              height: 16,
+                              colorFilter: ColorFilter.mode(
+                                AppColors.text.withOpacity(0.85),
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              rep['posizione'] ?? '',
+                              style: TextStyle(
+                                color: AppColors.text.withOpacity(0.85),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFfbc877).withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFFe6a823),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/university-svgrepo-com.svg',
+                          width: 16,
+                          height: 16,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.text,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          rep['materia'] ?? '',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primary, width: 1),
+                    ),
+                    child: Text(
+                      "${rep['livello']}ª classe",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/icons/dollar-sign-svgrepo-com.svg',
+                      width: 22,
+                      height: 22,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    "€${rep['prezzo']} / ora",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                rep['descrizione'] ?? '',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    //TODO: implement contact action
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Contatta",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

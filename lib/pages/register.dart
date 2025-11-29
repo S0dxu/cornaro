@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'login.dart';
 import 'package:flutter/services.dart';
+import 'package:cornaro/theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -25,77 +26,79 @@ class _RegisterPageState extends State<RegisterPage> {
   bool codeSent = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String currentTheme = "light";
 
   File? _selectedImage;
 
   Future<void> _pickImage() async {
     bool? proceed = await showDialog<bool>(
+      barrierColor: AppColors.text.withOpacity(0.05),
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Caricamento Immagine",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+      builder:
+          (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.contrast,
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                "L'immagine che selezionerai verrà caricata su Imgur e non su un cloud privato.\nVuoi procedere?",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-              const SizedBox(height: 24),
-              Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[100],
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text("Annulla"),
-                    ),
+                  const Text(
+                    "Caricamento Immagine",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xff0a45ac),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 12),
+                  Text(
+                    "L'immagine che selezionerai verrà caricata su Imgur e non su un cloud privato.\nVuoi procedere?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: AppColors.text),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.borderGrey,
+                            foregroundColor: AppColors.text,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Annulla"),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text("Procedi"),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Procedi"),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              )
-            ],
+              ),
+            ),
           ),
-        ),
-      ),
     );
 
     if (proceed != true) return;
@@ -108,7 +111,6 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     }
   }
-
 
   Future<void> _sendCode() async {
     if (_firstNameController.text.trim().isEmpty ||
@@ -131,7 +133,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => loading = true);
 
-    final url = Uri.parse("https://cornaro-backend.vercel.app/register/request");
+    final url = Uri.parse(
+      "https://cornaro-backend.vercel.app/register/request",
+    );
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -164,7 +168,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (_selectedImage != null) {
       final bytes = await _selectedImage!.readAsBytes();
-      final uploadUrl = Uri.parse("https://cornaro-backend.vercel.app/upload-imgur");
+      final uploadUrl = Uri.parse(
+        "https://cornaro-backend.vercel.app/upload-imgur",
+      );
       final request = http.MultipartRequest('POST', uploadUrl);
       request.files.add(
         http.MultipartFile.fromBytes('image', bytes, filename: 'profile.png'),
@@ -174,16 +180,16 @@ class _RegisterPageState extends State<RegisterPage> {
       final uploadData = await http.Response.fromStream(uploadResponse);
       final uploadJson = jsonDecode(uploadData.body);
 
-      if (uploadResponse.statusCode == 200 && uploadJson['link'] != null) {
-        imageLink = uploadJson['link'];
-      } else {
+      if (uploadResponse.statusCode != 200 || uploadJson['status'] == false) {
         setState(() => loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Errore caricamento immagine")),
-        );
+        final message = uploadJson['message'] ?? "Immagine non consentita";
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
         return;
       }
 
+      imageLink = uploadJson['link'];
     }
 
     final body = {
@@ -206,9 +212,9 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => loading = false);
 
     if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registrazione completata")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Registrazione completata")));
       Navigator.pop(context);
     } else {
       final data = jsonDecode(response.body);
@@ -220,24 +226,31 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    InputDecoration passwordInput(String label, bool obscure, VoidCallback toggle) {
+    InputDecoration passwordInput(
+      String label,
+      bool obscure,
+      VoidCallback toggle,
+    ) {
       return InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         filled: true,
-        fillColor: const Color(0xfff4f4f4),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        fillColor: AppColors.bgGrey,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xCCdadada), width: 1),
+          borderSide: BorderSide(color: AppColors.borderGrey, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xCCdadada), width: 1),
+          borderSide: BorderSide(color: AppColors.borderGrey, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xff0a45ac), width: 1.4),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.4),
         ),
         suffixIcon: IconButton(
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
@@ -247,48 +260,61 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xfff4f4f6),
+      /* resizeToAvoidBottomInset: false, */
+      backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        forceMaterialTransparency: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: AppColors.text,
           fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
+        iconTheme: IconThemeData(color: AppColors.text),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Center(
+            Center(
               child: Text(
                 "Registrati",
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 26,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.text,
                 ),
               ),
             ),
             const SizedBox(height: 20),
 
             if (!codeSent) ...[
-              TextField(controller: _firstNameController, decoration: modernInput("Nome")),
+              TextField(
+                controller: _firstNameController,
+                decoration: modernInput("Nome"),
+                style: TextStyle(color: AppColors.text),
+              ),
               const SizedBox(height: 14),
-              TextField(controller: _lastNameController, decoration: modernInput("Cognome")),
+              TextField(
+                controller: _lastNameController,
+                decoration: modernInput("Cognome"),
+                style: TextStyle(color: AppColors.text),
+              ),
               const SizedBox(height: 14),
-              TextField(controller: _instagramController, decoration: modernInput("Instagram (opzionale)")),
+              TextField(
+                controller: _instagramController,
+                decoration: modernInput("Instagram (opzionale)"),
+                style: TextStyle(color: AppColors.text),
+              ),
               const SizedBox(height: 14),
-              TextField(controller: _schoolEmailController, decoration: modernInput("Email scolastica")),
+              TextField(
+                controller: _schoolEmailController,
+                decoration: modernInput("Email scolastica"),
+                style: TextStyle(color: AppColors.text),
+              ),
               const SizedBox(height: 14),
 
               Row(
@@ -300,21 +326,30 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 50,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
-                          color: const Color(0xfff4f4f4),
+                          color: AppColors.bgGrey,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xCCdadada), width: 1),
+                          border: Border.all(
+                            color: AppColors.borderGrey,
+                            width: 1,
+                          ),
                         ),
                         alignment: Alignment.centerLeft,
                         child: Row(
                           children: [
-                            Icon(Icons.image, color: Colors.grey[700]),
+                            Icon(
+                              Icons.image,
+                              color: AppColors.text.withOpacity(0.7),
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 _selectedImage != null
                                     ? "Immagine selezionata"
                                     : "Seleziona immagine (opzionale)",
-                                style: TextStyle(color: Colors.grey[700]),
+                                style: TextStyle(
+                                  color: AppColors.text.withOpacity(0.7),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
@@ -334,12 +369,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                 ],
               ),
-              
+
               const SizedBox(height: 14),
 
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                style: TextStyle(color: AppColors.text),
                 decoration: passwordInput("Password", _obscurePassword, () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 }),
@@ -348,16 +384,30 @@ class _RegisterPageState extends State<RegisterPage> {
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
-                decoration: passwordInput("Conferma Password", _obscureConfirmPassword, () {
-                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
-                }),
+                style: TextStyle(color: AppColors.text),
+                decoration: passwordInput(
+                  "Conferma Password",
+                  _obscureConfirmPassword,
+                  () {
+                    setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 20),
               modernButton("Invia codice", loading, _sendCode),
             ] else ...[
-              TextField(controller: _codeController, decoration: modernInput("Codice ricevuto")),
+              TextField(
+                controller: _codeController,
+                decoration: modernInput("Codice ricevuto"),
+              ),
               const SizedBox(height: 24),
-              modernButton("Completa Registrazione", loading, _verifyAndRegister),
+              modernButton(
+                "Completa Registrazione",
+                loading,
+                _verifyAndRegister,
+              ),
             ],
           ],
         ),
