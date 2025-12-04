@@ -8,6 +8,8 @@ import 'package:cornaro/pages/promo.dart';
 import 'package:cornaro/pages/login.dart';
 import 'package:flutter/services.dart';
 import 'package:cornaro/theme.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 /* class AppColors {
   static Color get primary =>
@@ -165,7 +167,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool sortDescending = true;
   double maxMessages = 15;
 
-  List<Map<String, String>> generateMessages() {
+  /* List<Map<String, String>> generateMessages() {
     final now = DateTime.now();
     final List<Map<String, String>> texts = [
       {"text": "Attenzione: l'acqua non è potabile.", "type": "alert"},
@@ -198,6 +200,93 @@ class _HomeWidgetState extends State<HomeWidget> {
       };
     });
   }
+ */
+
+  Future<bool> _checkIsAdmin() async {
+    final token = await storage.read(key: 'session_token');
+    if (token == null) return false;
+
+    try {
+      final response = await http.get(
+        Uri.parse("https://cornaro-backend.onrender.com/is-admin"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['isAdmin'] ?? false;
+      }
+    } catch (e) {
+      print("Errore controllo admin: $e");
+    }
+
+    return false;
+  }
+
+
+  Future<void> _loadMessages() async {
+  final savedMessages = await storage.read(key: 'messages');
+  if (savedMessages != null) {
+    final List<dynamic> storedList = jsonDecode(savedMessages);
+    setState(() {
+      allMessages = storedList.map<Map<String, String>>((item) => Map<String, String>.from(item)).toList();
+      filteredMessages = List.from(allMessages);
+      _filterMessages();
+    });
+  }
+
+  try {
+    final token = await storage.read(key: 'session_token');
+    if (token == null) return;
+
+    final response = await http.get(
+      Uri.parse("https://cornaro-backend.onrender.com/get-info"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final List<dynamic> messagesData = data['infos'] ?? [];
+
+      final List<Map<String, String>> messages = messagesData.map<Map<String, String>>((item) {
+        return {
+          "text": item["message"] ?? "",
+          "type": item["type"] ?? "info",
+          "date": item["createdAt"] != null
+              ? _formatBackendDate(item["createdAt"])
+              : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+        };
+      }).toList();
+
+      bool isDifferent = jsonEncode(messages) != jsonEncode(allMessages);
+      if (isDifferent) {
+        await storage.write(key: 'messages', value: jsonEncode(messages));
+        setState(() {
+          allMessages = messages;
+          filteredMessages = List.from(allMessages);
+          _filterMessages();
+        });
+      }
+    } else {
+      print("Errore caricamento messaggi: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("Errore fetch messaggi: $e");
+  }
+}
+
+
+  String _formatBackendDate(String isoDate) {
+    final dt = DateTime.parse(isoDate).toLocal();
+    return "${dt.day}/${dt.month}/${dt.year}";
+  }
+
 
   @override
   void initState() {
@@ -211,10 +300,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     _loadMaxMessages();
-    allMessages = generateMessages();
-    filteredMessages = List.from(allMessages);
+    _loadMessages();
     searchController.addListener(_filterMessages);
   }
+
 
   Future<void> _loadMaxMessages() async {
     String? saved = await storage.read(key: 'max_messages');
@@ -296,10 +385,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
+      ),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 140),
+            padding: const EdgeInsets.only(top: 120),
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
               child: Column(
@@ -319,6 +414,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                             ),
                             child: TextField(
                               controller: searchController,
+                              style: TextStyle(
+                                color: AppColors.text,
+                              ),
                               decoration: InputDecoration(
                                 hintText: "Cerca",
                                 hintStyle: TextStyle(color: AppColors.text.withOpacity(0.65)),
@@ -537,11 +635,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                               isAlert ? AppColors.red.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
                           return Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
+                              horizontal: 16, vertical: 14
+                            ),
                             decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: AppColors.borderGrey, width: 1))),
+                            border: Border(
+                            bottom: BorderSide(
+                            color: AppColors.borderGrey, width: 1))),
                             child: Row(
                               children: [
                                 Container(
@@ -559,19 +658,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
-                                    child: Text(
+                                  child: Text(
                                   item["text"]!,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                      fontSize: 14.5, fontWeight: FontWeight.w400),
+                                  fontSize: 14, fontWeight: FontWeight.w400),
                                 )),
                                 const SizedBox(width: 10),
                                 SvgPicture.asset("assets/icons/arrow-right.svg",
                                     height: 18,
                                     width: 18,
-                                    colorFilter:
-                                        ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)),
+                                    colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)
+                                ),
                               ],
                             ),
                           );
@@ -585,11 +684,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ), */
-                  Image.asset(
+                  /* Image.asset(
                     "assets/icons/ads2.png",
                     width: double.infinity,
                     fit: BoxFit.cover,
-                  )
+                  ) */
                 ],
               ),
             ),
@@ -603,9 +702,8 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
             ),
             child: Container(
-              height: 140,
+              height: 110,
               width: double.infinity,
-              padding: const EdgeInsets.only(top: 30),
               child: Column(
                 children: [
                   const SizedBox(height: 26),
@@ -691,29 +789,60 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SettingsPage(
-                                  onThemeChanged: () {
-                                    setState(() {});
-                                  },
-                                ),
+                        child: Row(
+                          children: [
+                            FutureBuilder<bool>(
+                              future: _checkIsAdmin(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const SizedBox();
+                                }
+                                if (snapshot.hasData && snapshot.data == true) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AdminPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: SvgPicture.asset(
+                                      "assets/icons/admin.svg",
+                                      height: 24,
+                                      width: 24,
+                                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox();
+                              },
+                            ),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SettingsPage(
+                                      onThemeChanged: () {
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: SvgPicture.asset(
+                                "assets/icons/settings-svgrepo-com.svg",
+                                height: 24,
+                                width: 24,
+                                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                               ),
-                            );
-
-                          },
-                          child: SvgPicture.asset(
-                            "assets/icons/settings-svgrepo-com.svg",
-                            height: 24,
-                            width: 24,
-                            colorFilter:
-                                const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                          ),
+                            ),
+                          ],
                         ),
                       ),
+
                     ],
                   ),
                 ),
@@ -799,10 +928,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarIconBrightness: currentTheme == "light" ? Brightness.dark : Brightness.light,
-        statusBarBrightness:  currentTheme == "light" ? Brightness.light : Brightness.dark,
-      ),
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
         //systemOverlayStyle: SystemUiOverlayStyle.light,
         forceMaterialTransparency: true,
         title: Text(
@@ -1544,3 +1671,237 @@ class _ViewPageState extends State<ViewPage> {
   }
 }
 
+class AdminPage extends StatelessWidget {
+  const AdminPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: AppColors.text),
+        title: Text(
+          "Pannello Admin",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddInfoPage()),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.contrast,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.text.withOpacity(0.05),
+                  blurRadius: 0,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  "assets/icons/info.svg",
+                  height: 20,
+                  width: 20,
+                  colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.65), BlendMode.srcIn),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "Aggiungi Info",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: AppColors.text,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AddInfoPage extends StatefulWidget {
+  const AddInfoPage({super.key});
+
+  @override
+  State<AddInfoPage> createState() => _AddInfoPageState();
+}
+
+class _AddInfoPageState extends State<AddInfoPage> {
+  final _titleController = TextEditingController();
+  final _messageController = TextEditingController();
+  String? _selectedType;
+  bool loading = false;
+
+  Future<void> _submitInfo() async {
+    final title = _titleController.text.trim();
+    final message = _messageController.text.trim();
+
+    if (title.isEmpty || message.isEmpty || _selectedType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Tutti i campi sono obbligatori")),
+      );
+      return;
+    }
+
+    setState(() => loading = true);
+
+    final token = await storage.read(key: 'session_token');
+    if (token == null) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sessione scaduta, effettua il login")),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://cornaro-backend.onrender.com/add-info"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "title": title,
+          "message": message,
+          "type": _selectedType,
+        }),
+      );
+
+      setState(() => loading = false);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Avviso aggiunto con successo!")),
+        );
+        Navigator.of(context).pop();
+      } else {
+        final error = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Errore: $error")),
+        );
+      }
+    } catch (e) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Errore: $e")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: AppColors.text),
+        title: Text(
+          "Aggiungi Info",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: modernInput("Titolo"),
+              style: TextStyle(color: AppColors.text),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _messageController,
+              decoration: modernInput("Messaggio"),
+              style: TextStyle(color: AppColors.text),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.bgGrey,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.borderGrey, width: 1),
+              ),
+              child: DropdownButton<String>(
+                value: _selectedType,
+                hint: Text(
+                  "Seleziona Tipo",
+                  style: TextStyle(
+                    color: AppColors.text.withOpacity(0.6),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins"
+                  ),
+                ),
+                isExpanded: true,
+                underline: const SizedBox(),
+                dropdownColor: AppColors.contrast,
+                style: TextStyle(
+                  color: AppColors.text,
+                  fontSize: 14,
+                  fontFamily: "Poppins"
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: "info",
+                    child: Text(
+                      "Info",
+                      style: TextStyle(color: AppColors.text),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: "alert",
+                    child: Text(
+                      "Alert",
+                      style: TextStyle(color: AppColors.text),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedType = value;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            modernButton("Aggiungi", loading, _submitInfo),
+          ],
+        ),
+      ),
+    );
+  }
+}

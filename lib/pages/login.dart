@@ -17,7 +17,11 @@ InputDecoration modernInput(String label) {
   return InputDecoration(
     labelText: label,
     hintStyle: TextStyle(color: AppColors.red),
-    labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    labelStyle: TextStyle(
+      color: AppColors.text.withOpacity(0.6),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
     filled: true,
     fillColor: AppColors.bgGrey,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -99,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     setState(() => loading = true);
-    final url = Uri.parse("https://cornaro-backend.vercel.app/login");
+    final url = Uri.parse("https://cornaro-backend.onrender.com/login");
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

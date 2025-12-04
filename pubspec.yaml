@@ -76,8 +76,6 @@ flutter:
     - assets/icons/images/
     - assets/icons/
     - assets/icons/x/
-    - assets/icons/search.svg
-    - assets/icons/filter.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
