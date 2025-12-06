@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:cornaro/theme.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 
 /* class AppColors {
   static Color get primary =>
@@ -166,6 +167,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   String filterType = "all";
   bool sortDescending = true;
   double maxMessages = 15;
+  int _adminTapCount = 0;
+  Timer? _resetTapTimer;
 
   /* List<Map<String, String>> generateMessages() {
     final now = DateTime.now();
@@ -201,6 +204,30 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
   }
  */
+
+  void _handleAdminTap() async {
+    _adminTapCount++;
+
+    _resetTapTimer?.cancel();
+
+    _resetTapTimer = Timer(const Duration(seconds: 1), () {
+      _adminTapCount = 0;
+    });
+
+    if (_adminTapCount >= 2) {
+      _adminTapCount = 0;
+      _resetTapTimer?.cancel();
+
+      final isAdmin = await _checkIsAdmin();
+      if (isAdmin) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminPage()),
+        );
+      }
+    }
+  }
+
 
   Future<bool> _checkIsAdmin() async {
     final token = await storage.read(key: 'session_token');
@@ -712,134 +739,105 @@ class _HomeWidgetState extends State<HomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              showGeneralDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                barrierLabel: "Close",
-                                barrierColor: AppColors.text.withOpacity(0.05),
-                                transitionDuration: const Duration(milliseconds: 200),
-                                pageBuilder: (_, __, ___) {
-                                  final double size = MediaQuery.of(context).size.width - 80;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: Center(
-                                        child: GestureDetector(
-                                          onTap: () {},
-                                          child: ClipOval(
-                                            child: Container(
-                                              width: size,
-                                              height: size,
-                                              color: AppColors.bgGrey,
-                                              child: InteractiveViewer(
-                                                child: widget.profileImage.isNotEmpty
-                                                    ? Image.network(
-                                                        widget.profileImage,
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    : Image.asset(
-                                                        "assets/icons/profile.png",
-                                                        fit: BoxFit.cover,
-                                                      ),
+                      GestureDetector(
+                        onTap: _handleAdminTap,
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                showGeneralDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  barrierLabel: "Close",
+                                  barrierColor: AppColors.text.withOpacity(0.05),
+                                  transitionDuration: const Duration(milliseconds: 200),
+                                  pageBuilder: (_, __, ___) {
+                                    final double size = MediaQuery.of(context).size.width - 80;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: Center(
+                                          child: GestureDetector(
+                                            onTap: () {},
+                                            child: ClipOval(
+                                              child: Container(
+                                                width: size,
+                                                height: size,
+                                                color: AppColors.bgGrey,
+                                                child: InteractiveViewer(
+                                                  child: widget.profileImage.isNotEmpty
+                                                      ? Image.network(
+                                                          widget.profileImage,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.asset(
+                                                          "assets/icons/profile.png",
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child: CircleAvatar(
-                              radius: 28,
-                              backgroundColor: AppColors.contrast.withOpacity(0.2),
-                              backgroundImage: widget.profileImage.isNotEmpty
-                                  ? NetworkImage(widget.profileImage)
-                                  : const AssetImage("assets/icons/profile.png") as ImageProvider,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(widget.name,
-                                  style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white)),
-                              Text(
-                                widget.userName != "" ? "@${widget.userName}" : "",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white,
-                                ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 28,
+                                backgroundColor: AppColors.contrast.withOpacity(0.2),
+                                backgroundImage: widget.profileImage.isNotEmpty
+                                    ? NetworkImage(widget.profileImage)
+                                    : const AssetImage("assets/icons/profile.png") as ImageProvider,
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(widget.name,
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white)),
+                                Text(
+                                  widget.userName != "" ? "@${widget.userName}" : "",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Row(
-                          children: [
-                            FutureBuilder<bool>(
-                              future: _checkIsAdmin(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const SizedBox();
-                                }
-                                if (snapshot.hasData && snapshot.data == true) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => AdminPage(),
-                                        ),
-                                      );
-                                    },
-                                    child: SvgPicture.asset(
-                                      "assets/icons/admin.svg",
-                                      height: 24,
-                                      width: 24,
-                                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                    ),
-                                  );
-                                }
-                                return const SizedBox();
-                              },
-                            ),
-                            const SizedBox(width: 10),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SettingsPage(
-                                      onThemeChanged: () {
-                                        setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: SvgPicture.asset(
-                                "assets/icons/settings-svgrepo-com.svg",
-                                height: 24,
-                                width: 24,
-                                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SettingsPage(
+                                  onThemeChanged: () {
+                                    setState(() {});
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
+                            );
+                          },
+                          child: SvgPicture.asset(
+                            "assets/icons/settings-svgrepo-com.svg",
+                            height: 24,
+                            width: 24,
+                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                          ),
                         ),
                       ),
 
@@ -1348,20 +1346,23 @@ class _ViewPageState extends State<ViewPage> {
   final TextEditingController searchController = TextEditingController();
   String filterType = "all";
   bool sortDescending = true;
+  int currentPage = 1;
+  int totalPages = 1;
+  bool isLoading = false;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: AppColors.bgGrey,
-        statusBarIconBrightness: currentTheme == "light" ? Brightness.dark : Brightness.light,
-        statusBarBrightness:  currentTheme == "light" ? Brightness.light : Brightness.dark,
-      ),
-    );
-    allMessages = generateMessages();
-    filteredMessages = List.from(allMessages);
+
+    fetchMessages(); 
     searchController.addListener(_filterMessages);
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 100) {
+        fetchMessages(page: currentPage + 1);
+      }
+    });
   }
 
   @override
@@ -1376,38 +1377,51 @@ class _ViewPageState extends State<ViewPage> {
     super.dispose();
   }
 
-  List<Map<String, String>> generateMessages() {
-    final now = DateTime.now();
-    final List<Map<String, String>> texts = [
-      {"text": "Attenzione: l'acqua non è potabile.", "type": "alert"},
-      {"text": "Nuova manutenzione programmata venerdì.", "type": "info"},
-      {"text": "Aggiornamento orari apertura sportello di matematica.", "type": "info"},
-      {"text": "Servizio raccolta differenziata posticipato.", "type": "info"},
-      {"text": "Allerta meteo per forti piogge. Ricordarsi di portare ombrelli e/o ponchi", "type": "alert"},
-      {"text": "Evento locale: festa di San Martino.", "type": "info"},
-      {"text": "Nuove offerte nel negozio del paese.", "type": "info"},
-      {"text": "Interruzione temporanea elettricità.", "type": "alert"},
-      {"text": "Avviso: chiusura strade per lavori pubblici.", "type": "alert"},
-      {"text": "Promozione acqua minerale in negozio.", "type": "info"},
-      {"text": "Nuovo avviso pubblico affisso in bacheca.", "type": "alert"},
-      {"text": "Aggiornamento sul servizio navetta.", "type": "info"},
-      {"text": "Riapertura biblioteca comunale.", "type": "info"},
-      {"text": "Mercatino domenicale spostato in piazza centrale.", "type": "info"},
-      {"text": "Servizio di pulizia straordinario sabato.", "type": "info"},
-      {"text": "Attenzione: lavori fognari in corso.", "type": "alert"},
-      {"text": "Nuova ordinanza per la raccolta rifiuti.", "type": "alert"},
-      {"text": "Evento sportivo sabato alle 18.", "type": "info"},
-      {"text": "Sospensione erogazione gas per manutenzione.", "type": "alert"},
-      {"text": "Comunicazione importante dal comune.", "type": "info"},
-    ];
-    return List.generate(20, (i) {
-      final date = now.subtract(Duration(days: i ~/ 3));
-      return {
-        "text": texts[i]["text"]!,
-        "type": texts[i]["type"]!,
-        "date": "${date.day}/${date.month}/${date.year}",
-      };
-    });
+  String formatBackendDate(String isoDate) {
+    final date = DateTime.parse(isoDate);
+    return "${date.day}/${date.month}/${date.year}";
+  }
+
+  Future<void> fetchMessages({int page = 1}) async {
+    if (isLoading) return;
+    if (page > totalPages) return;
+
+    setState(() => isLoading = true);
+
+    final url = Uri.parse('https://cornaro-backend.onrender.com/get-info?page=$page');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> infos = data['infos'];
+        totalPages = data['totalPages'];
+
+        final newMessages = infos.map<Map<String, String>>((info) {
+          return {
+            "text": info['message'] ?? '',
+            "type": info['type'] ?? 'info',
+            "date": formatBackendDate(info['createdAt']),
+          };
+        }).toList();
+
+        setState(() {
+          if (page == 1) {
+            allMessages = newMessages;
+          } else {
+            allMessages.addAll(newMessages);
+          }
+          filteredMessages = List.from(allMessages);
+          _filterMessages();
+          currentPage = page;
+        });
+      } else {
+        print("Errore nel recupero dati: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Errore: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   void _filterMessages() {
@@ -1455,11 +1469,18 @@ class _ViewPageState extends State<ViewPage> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 0,
+      ),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 100),
+            padding: const EdgeInsets.only(top: 60),
             child: SingleChildScrollView(
+              controller: scrollController,
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1514,11 +1535,9 @@ class _ViewPageState extends State<ViewPage> {
             ),
           ),
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: 10),
             child: Column(
               children: [
-                const SizedBox(height: 26),
                 Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: Row(

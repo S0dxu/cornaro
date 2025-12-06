@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'login.dart';
 import 'package:flutter/services.dart';
 import 'package:cornaro/theme.dart';
+import 'package:flutter/foundation.dart';
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,6 +29,9 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String currentTheme = "light";
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageLink;
+
 
   File? _selectedImage;
 
@@ -34,83 +39,113 @@ class _RegisterPageState extends State<RegisterPage> {
     bool? proceed = await showDialog<bool>(
       barrierColor: AppColors.text.withOpacity(0.05),
       context: context,
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.contrast,
-                borderRadius: BorderRadius.circular(12),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.contrast,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Caricamento Immagine", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 12),
+              Text(
+                "L'immagine che selezionerai verrà caricata su Imgur e non su un cloud privato.\nVuoi procedere?",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: AppColors.text),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              const SizedBox(height: 24),
+              Row(
                 children: [
-                  const Text(
-                    "Caricamento Immagine",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "L'immagine che selezionerai verrà caricata su Imgur e non su un cloud privato.\nVuoi procedere?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: AppColors.text),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.borderGrey,
-                            foregroundColor: AppColors.text,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text("Annulla"),
-                        ),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.borderGrey,
+                        foregroundColor: AppColors.text,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text("Procedi"),
-                        ),
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text("Annulla"),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                    ],
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text("Procedi"),
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
+        ),
+      ),
     );
 
     if (proceed != true) return;
 
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
+    if (pickedFile == null) return;
+
+    setState(() => loading = true);
+
+    try {
+      Uint8List imageBytes;
+
+      if (kIsWeb) {
+        imageBytes = await pickedFile.readAsBytes();
+        _selectedImageBytes = imageBytes;
+      } else {
+        final file = File(pickedFile.path);
+        imageBytes = await file.readAsBytes();
+        _selectedImage = file;
+      }
+
+      final uploadUrl = Uri.parse("https://cornaro-backend.onrender.com/upload-imgur");
+      final request = http.MultipartRequest('POST', uploadUrl);
+      request.files.add(http.MultipartFile.fromBytes('image', imageBytes, filename: 'profile.png'));
+
+      final uploadResponse = await request.send();
+      final uploadData = await http.Response.fromStream(uploadResponse);
+      final uploadJson = jsonDecode(uploadData.body);
+
+      if (uploadJson['link'] != null) {
+        setState(() {
+          _selectedImageLink = uploadJson['link'];
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Immagine caricata con successo")),
+        );
+      } else {
+        throw Exception(uploadJson['message'] ?? "Errore upload");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Errore caricamento immagine: ${e.toString()}")),
+      );
+      _selectedImage = null;
+      _selectedImageBytes = null;
+    } finally {
+      setState(() => loading = false);
     }
   }
+
+
 
   Future<void> _sendCode() async {
     if (_firstNameController.text.trim().isEmpty ||
@@ -134,12 +169,12 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => loading = true);
 
     final url = Uri.parse(
-      "https://cornaro-backend.onrender.com/register/request",
+      "https://cornaro-backend.vercel.app/register/request",
     );
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"schoolEmail": _schoolEmailController.text.trim()}),
+      body: jsonEncode({"schoolEmail": "${_schoolEmailController.text.trim()}@studenti.liceocornaro.edu.it"}),
     );
 
     setState(() => loading = false);
@@ -164,65 +199,44 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => loading = true);
 
-    String? imageLink;
+    try {
+      final body = {
+        "firstName": _firstNameController.text.trim(),
+        "lastName": _lastNameController.text.trim(),
+        "instagram": _instagramController.text.trim(),
+        "schoolEmail": "${_schoolEmailController.text.trim()}@studenti.liceocornaro.edu.it",
+        "password": _passwordController.text.trim(),
+        "code": _codeController.text.trim(),
+        if (_selectedImageLink != null) "profileImage": _selectedImageLink,
+      };
 
-    if (_selectedImage != null) {
-      final bytes = await _selectedImage!.readAsBytes();
-      final uploadUrl = Uri.parse(
-        "https://cornaro-backend.onrender.com/upload-imgur",
+      final url = Uri.parse("https://cornaro-backend.vercel.app/register/verify");
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
       );
-      final request = http.MultipartRequest('POST', uploadUrl);
-      request.files.add(
-        http.MultipartFile.fromBytes('image', bytes, filename: 'profile.png'),
-      );
 
-      final uploadResponse = await request.send();
-      final uploadData = await http.Response.fromStream(uploadResponse);
-      final uploadJson = jsonDecode(uploadData.body);
-
-      if (uploadResponse.statusCode != 200 || uploadJson['status'] == false) {
-        setState(() => loading = false);
-        final message = uploadJson['message'] ?? "Immagine non consentita";
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
-        return;
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registrazione completata")),
+        );
+        Navigator.pop(context);
+      } else {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Errore registrazione')),
+        );
       }
-
-      imageLink = uploadJson['link'];
-    }
-
-    final body = {
-      "firstName": _firstNameController.text.trim(),
-      "lastName": _lastNameController.text.trim(),
-      "instagram": _instagramController.text.trim(),
-      "schoolEmail": _schoolEmailController.text.trim(),
-      "password": _passwordController.text.trim(),
-      "code": _codeController.text.trim(),
-      if (imageLink != null) "profileImage": imageLink,
-    };
-
-    final url = Uri.parse("https://cornaro-backend.onrender.com/register/verify");
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
-    );
-
-    setState(() => loading = false);
-
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Registrazione completata")));
-      Navigator.pop(context);
-    } else {
-      final data = jsonDecode(response.body);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data['message'] ?? 'Errore registrazione')),
+        SnackBar(content: Text('Errore registrazione')),
       );
+    } finally {
+      setState(() => loading = false);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +306,60 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 20),
 
             if (!codeSent) ...[
+              GestureDetector(
+                onTap: _pickImage,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.bgGrey,
+                        border: Border.all(
+                          color: AppColors.borderGrey,
+                          width: 1,
+                        ),
+                      ),
+                      child: (_selectedImage != null || _selectedImageBytes != null)
+                        ? ClipOval(
+                            child: kIsWeb
+                                ? (_selectedImageBytes != null
+                                    ? Image.memory(
+                                        _selectedImageBytes!,
+                                        fit: BoxFit.cover,
+                                        width: 80,
+                                        height: 80,
+                                      )
+                                    : Container())
+                                : (_selectedImage != null
+                                    ? Image.file(
+                                        _selectedImage!,
+                                        fit: BoxFit.cover,
+                                        width: 80,
+                                        height: 80,
+                                      )
+                                    : Container()),
+                          )
+                        : Icon(
+                            Icons.camera_alt,
+                            size: 36,
+                            color: AppColors.text.withOpacity(0.7),
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Foto profilo",
+                      style: TextStyle(
+                        color: AppColors.text.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
               TextField(
                 controller: _firstNameController,
                 decoration: modernInput("Nome"),
@@ -312,62 +380,24 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 14),
               TextField(
                 controller: _schoolEmailController,
-                decoration: modernInput("Email scolastica"),
+                keyboardType: TextInputType.emailAddress,
+                decoration: modernInput("Email scolastica").copyWith(
+                  suffixText: "@studenti.liceocor...",
+                  suffixStyle: TextStyle(color: AppColors.text.withOpacity(0.8)),
+                ),
                 style: TextStyle(color: AppColors.text),
-              ),
-              const SizedBox(height: 14),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: AppColors.bgGrey,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.borderGrey,
-                            width: 1,
-                          ),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.image,
-                              color: AppColors.text.withOpacity(0.7),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _selectedImage != null
-                                    ? "Immagine selezionata"
-                                    : "Seleziona immagine (opzionale)",
-                                style: TextStyle(
-                                  color: AppColors.text.withOpacity(0.7),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_selectedImage != null) ...[
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundImage: FileImage(_selectedImage!),
-                      ),
-                    ),
-                  ],
-                ],
+                onChanged: (value) {
+                  final atIndex = value.indexOf('@');
+                  if (atIndex != -1) {
+                    final cleaned = value.substring(0, atIndex);
+                    if (cleaned != value) {
+                      _schoolEmailController.text = cleaned;
+                      _schoolEmailController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: cleaned.length),
+                      );
+                    }
+                  }
+                },
               ),
 
               const SizedBox(height: 14),

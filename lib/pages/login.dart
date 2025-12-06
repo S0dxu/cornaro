@@ -16,7 +16,7 @@ import 'package:flutter/services.dart';
 InputDecoration modernInput(String label) {
   return InputDecoration(
     labelText: label,
-    hintStyle: TextStyle(color: AppColors.red),
+    hintStyle: TextStyle(color: AppColors.primary),
     labelStyle: TextStyle(
       color: AppColors.text.withOpacity(0.6),
       fontSize: 14,
@@ -41,30 +41,41 @@ InputDecoration modernInput(String label) {
 }
 
 Widget modernButton(String text, bool loading, VoidCallback onTap) {
-  return SizedBox(
-    height: 52,
-    width: double.infinity,
-    child: ElevatedButton(
-      onPressed: loading ? null : onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+  return Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 500),
+      child: SizedBox(
+        height: 52,
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: loading ? null : onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: loading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: Color(0xfff4f4f6),
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
         ),
       ),
-      child: loading
-          ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(color: Color(0xfff4f4f6), strokeWidth: 2),
-            )
-          : Text(
-              text,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
     ),
   );
 }
@@ -108,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
       url,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "schoolEmail": _schoolEmailController.text,
+        "schoolEmail": "${_schoolEmailController.text.trim()}@studenti.liceocornaro.edu.it",
         "password": _passwordController.text,
       }),
     );
@@ -165,9 +176,24 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               TextField(
                 controller: _schoolEmailController,
-                cursorColor: AppColors.primary,
-                decoration: modernInput("Email scolastica"),
+                keyboardType: TextInputType.emailAddress,
+                decoration: modernInput("Email scolastica").copyWith(
+                  suffixText: "@studenti.liceocor...",
+                  suffixStyle: TextStyle(color: AppColors.text.withOpacity(0.8)),
+                ),
                 style: TextStyle(color: AppColors.text),
+                onChanged: (value) {
+                  final atIndex = value.indexOf('@');
+                  if (atIndex != -1) {
+                    final cleaned = value.substring(0, atIndex);
+                    if (cleaned != value) {
+                      _schoolEmailController.text = cleaned;
+                      _schoolEmailController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: cleaned.length),
+                      );
+                    }
+                  }
+                },
               ),
               const SizedBox(height: 14),
               TextField(
