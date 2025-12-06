@@ -283,6 +283,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       final List<Map<String, String>> messages = messagesData.map<Map<String, String>>((item) {
         return {
+          "title": item["title"] ?? "",
           "text": item["message"] ?? "",
           "type": item["type"] ?? "info",
           "date": item["createdAt"] != null
@@ -660,45 +661,61 @@ class _HomeWidgetState extends State<HomeWidget> {
                           final iconColor = isAlert ? AppColors.red : AppColors.primary;
                           final iconBgColor =
                               isAlert ? AppColors.red.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14
-                            ),
-                            decoration: BoxDecoration(
-                            border: Border(
-                            bottom: BorderSide(
-                            color: AppColors.borderGrey, width: 1))),
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: 44,
-                                  width: 44,
-                                  decoration:
-                                      BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
-                                  child: Center(
-                                    child: SvgPicture.asset(iconPath,
-                                        height: 24,
-                                        width: 24,
-                                        colorFilter:
-                                            ColorFilter.mode(iconColor, BlendMode.srcIn)),
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DetailPage(
+                                    title: item["title"]!,
+                                    message: item["text"]!,
+                                    type: item["type"]!,
+                                    date: item["date"]!,
                                   ),
                                 ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Text(
-                                  item["text"]!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w400),
-                                )),
-                                const SizedBox(width: 10),
-                                SvgPicture.asset("assets/icons/arrow-right.svg",
-                                    height: 18,
-                                    width: 18,
-                                    colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)
-                                ),
-                              ],
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14
+                              ),
+                              decoration: BoxDecoration(
+                              border: Border(
+                              bottom: BorderSide(
+                              color: AppColors.borderGrey, width: 1))),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 44,
+                                    width: 44,
+                                    decoration:
+                                        BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                                    child: Center(
+                                      child: SvgPicture.asset(iconPath,
+                                          height: 24,
+                                          width: 24,
+                                          colorFilter:
+                                              ColorFilter.mode(iconColor, BlendMode.srcIn)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                    item["text"]!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w400),
+                                  )),
+                                  const SizedBox(width: 10),
+                                  SvgPicture.asset("assets/icons/arrow-right.svg",
+                                      height: 18,
+                                      width: 18,
+                                      colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }),
@@ -1398,6 +1415,7 @@ class _ViewPageState extends State<ViewPage> {
 
         final newMessages = infos.map<Map<String, String>>((info) {
           return {
+            "title": info['title'] ?? '',
             "text": info['message'] ?? '',
             "type": info['type'] ?? 'info',
             "date": formatBackendDate(info['createdAt']),
@@ -1505,24 +1523,40 @@ class _ViewPageState extends State<ViewPage> {
                           final iconPath = isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
                           final iconColor = isAlert ? AppColors.red : AppColors.primary;
                           final iconBgColor = isAlert ? AppColors.primary.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.borderGrey, width: 1))),
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: 44,
-                                  width: 44,
-                                  decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
-                                  child: Center(
-                                    child: SvgPicture.asset(iconPath, height: 24, width: 24, colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)),
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DetailPage(
+                                    title: item["title"]!,
+                                    message: item["text"]!,
+                                    type: item["type"]!,
+                                    date: item["date"]!,
                                   ),
                                 ),
-                                const SizedBox(width: 14),
-                                Expanded(child: Text(item["text"]!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w400))),
-                                const SizedBox(width: 10),
-                                SvgPicture.asset("assets/icons/arrow-right.svg", height: 18, width: 18, colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)),
-                              ],
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.borderGrey, width: 1))),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 44,
+                                    width: 44,
+                                    decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                                    child: Center(
+                                      child: SvgPicture.asset(iconPath, height: 24, width: 24, colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(child: Text(item["text"]!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w400))),
+                                  const SizedBox(width: 10),
+                                  SvgPicture.asset("assets/icons/arrow-right.svg", height: 18, width: 18, colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)),
+                                ],
+                              ),
                             ),
                           );
                         }),
@@ -1535,7 +1569,7 @@ class _ViewPageState extends State<ViewPage> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 4),
             child: Column(
               children: [
                 Padding(
@@ -1918,6 +1952,102 @@ class _AddInfoPageState extends State<AddInfoPage> {
             ),
             const SizedBox(height: 24),
             modernButton("Aggiungi", loading, _submitInfo),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailPage extends StatelessWidget {
+  final String title;
+  final String message;
+  final String type;
+  final String date;
+
+  const DetailPage({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.type,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isAlert = type == "alert";
+    final iconPath = isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
+    final iconColor = isAlert ? AppColors.red : AppColors.primary;
+
+    String formatDate(String dateString) {
+      final parts = dateString.split('/');
+      final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+
+      const months = [
+          "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
+        ];
+        return "${date.day} ${months[date.month]} ${date.year}";
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        /* title: Text(title, style: TextStyle(fontSize: 18)), */
+        centerTitle: true,
+      ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 1),
+                  child: SvgPicture.asset(
+                    iconPath,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                    width: 22,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  formatDate(date),
+                  style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            /* Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 1),
+                  child: SvgPicture.asset(
+                    iconPath,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                    width: 22,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  type,
+                  style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ), */
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16),
+            ),
           ],
         ),
       ),
