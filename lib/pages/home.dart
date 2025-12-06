@@ -421,13 +421,13 @@ class _HomeWidgetState extends State<HomeWidget> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 120),
+            padding: const EdgeInsets.only(top: 100),
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
@@ -595,7 +595,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 12),
                   ...grouped.entries.toList().asMap().entries.map((groupEntry) {
                     final index = groupEntry.key;
                     final entry = groupEntry.value;
