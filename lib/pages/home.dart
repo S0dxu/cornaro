@@ -405,6 +405,17 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
+  String formatFullDate(String dateString) {
+    final parts = dateString.split('/');
+    final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+
+    const months = [
+      "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
+      "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
+    ];
+    return "${date.day} ${months[date.month]} ${date.year}";
+  }
+
  @override
   Widget build(BuildContext context) {
     Map<String, List<Map<String, String>>> grouped = {};
@@ -469,8 +480,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
-                              backgroundColor: AppColors.contrast,
-                              barrierColor: AppColors.text.withOpacity(0.05),
+                              backgroundColor: AppColors.bgGrey,
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                               ),
@@ -487,7 +497,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                           children: [
                                             const SizedBox(height: 20),
                                             Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
-                                            const Center(child: Text("Filtra per", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))),
+                                            const Center(child: Text("Filtra per", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))),
                                             const SizedBox(height: 25),
                                             const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Importanza", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
                                             const SizedBox(height: 10),
@@ -663,7 +673,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                               isAlert ? AppColors.red.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
                           return GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            onTap: () {
+                            /* onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -674,6 +684,70 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     date: item["date"]!,
                                   ),
                                 ),
+                              );
+                            }, */
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) {
+                                  return DraggableScrollableSheet(
+                                    initialChildSize: 0.6,
+                                    minChildSize: 0.4,
+                                    maxChildSize: 0.9,
+                                    expand: false,
+                                    builder: (context, scrollController) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: AppColors.bgGrey,
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                        ),
+                                        child: SingleChildScrollView(
+                                          controller: scrollController,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
+                                                Center(
+                                                  child: Text(
+                                                    item["title"]!,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Text(
+                                                  item["text"]!,
+                                                  style: const TextStyle(fontSize: 15),
+                                                ),
+                                                const SizedBox(height: 24),
+                                                Row(
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                      item["type"] == "alert" ? "assets/icons/alert.svg" : "assets/icons/info.svg",
+                                                      colorFilter: ColorFilter.mode(
+                                                          item["type"] == "alert" ? AppColors.red : AppColors.primary,
+                                                          BlendMode.srcIn),
+                                                      width: 22,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      formatFullDate(item["date"]!),
+                                                      style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               );
                             },
                             child: Container(
@@ -1479,6 +1553,17 @@ class _ViewPageState extends State<ViewPage> {
     return "${date.day} ${months[date.month]} ${date.year}";
   }
 
+  String formatFullDate(String dateString) {
+    final parts = dateString.split('/');
+    final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+
+    const months = [
+      "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
+      "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
+    ];
+    return "${date.day} ${months[date.month]} ${date.year}";
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<String, List<Map<String, String>>> grouped = {};
@@ -1525,7 +1610,7 @@ class _ViewPageState extends State<ViewPage> {
                           final iconBgColor = isAlert ? AppColors.primary.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
                           return GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            onTap: () {
+                            /* onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -1536,6 +1621,71 @@ class _ViewPageState extends State<ViewPage> {
                                     date: item["date"]!,
                                   ),
                                 ),
+                              );
+                            }, */
+                            
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) {
+                                  return DraggableScrollableSheet(
+                                    initialChildSize: 0.6,
+                                    minChildSize: 0.4,
+                                    maxChildSize: 0.9,
+                                    expand: false,
+                                    builder: (context, scrollController) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: AppColors.bgGrey,
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                        ),
+                                        child: SingleChildScrollView(
+                                          controller: scrollController,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
+                                                Center(
+                                                  child: Text(
+                                                    item["title"]!,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Text(
+                                                  item["text"]!,
+                                                  style: const TextStyle(fontSize: 15),
+                                                ),
+                                                const SizedBox(height: 24),
+                                                Row(
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                      item["type"] == "alert" ? "assets/icons/alert.svg" : "assets/icons/info.svg",
+                                                      colorFilter: ColorFilter.mode(
+                                                          item["type"] == "alert" ? AppColors.red : AppColors.primary,
+                                                          BlendMode.srcIn),
+                                                      width: 22,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      formatFullDate(item["date"]!),
+                                                      style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               );
                             },
                             child: Container(
@@ -1618,8 +1768,7 @@ class _ViewPageState extends State<ViewPage> {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
-                              backgroundColor: AppColors.contrast,
-                              barrierColor: AppColors.text.withOpacity(0.05),
+                              backgroundColor: AppColors.bgGrey,
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                               ),
@@ -1636,7 +1785,7 @@ class _ViewPageState extends State<ViewPage> {
                                           children: [
                                             const SizedBox(height: 20),
                                             Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
-                                            const Center(child: Text("Filtra per", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))),
+                                            const Center(child: Text("Filtra per", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))),
                                             const SizedBox(height: 25),
                                             const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Importanza", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
                                             const SizedBox(height: 10),
@@ -1727,6 +1876,54 @@ class _ViewPageState extends State<ViewPage> {
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
 
+  Widget _tile({
+    required String icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.contrast,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.text.withOpacity(0.05),
+              blurRadius: 0,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              icon,
+              height: 20,
+              width: 20,
+              colorFilter: ColorFilter.mode(
+                AppColors.text.withOpacity(0.65),
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                color: AppColors.text,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1748,48 +1945,29 @@ class AdminPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddInfoPage()),
-            );
-          },
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.contrast,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.text.withOpacity(0.05),
-                  blurRadius: 0,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+        child: Column(
+          children: [
+            _tile(
+              icon: "assets/icons/info.svg",
+              label: "Aggiungi Info",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddInfoPage()),
+                );
+              },
             ),
-            margin: const EdgeInsets.symmetric(vertical: 16),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  "assets/icons/info.svg",
-                  height: 20,
-                  width: 20,
-                  colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.65), BlendMode.srcIn),
-                ),
-                SizedBox(width: 8),
-                Text(
-                  "Aggiungi Info",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                    color: AppColors.text,
-                  ),
-                ),
-              ],
+            _tile(
+              icon: "assets/icons/edit.svg",
+              label: "Gestisci / Elimina Info",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ManageInfoPage()),
+                );
+              },
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -1959,7 +2137,296 @@ class _AddInfoPageState extends State<AddInfoPage> {
   }
 }
 
-class DetailPage extends StatelessWidget {
+class ManageInfoPage extends StatefulWidget {
+  const ManageInfoPage({super.key});
+
+  @override
+  State<ManageInfoPage> createState() => _ManageInfoPageState();
+}
+
+class _ManageInfoPageState extends State<ManageInfoPage> {
+  final storage = FlutterSecureStorage();
+  List infos = [];
+  bool loading = true;
+  int page = 1;
+  bool hasMore = true;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    loadInfos();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !loading &&
+          hasMore) {
+        loadInfos(nextPage: true);
+      }
+    });
+  }
+
+  Future<void> loadInfos({bool nextPage = false}) async {
+    if (nextPage) {
+      page++;
+    } else {
+      page = 1;
+      infos.clear();
+      hasMore = true;
+    }
+
+    setState(() => loading = true);
+
+    final response = await http.get(
+      Uri.parse("https://cornaro-backend.onrender.com/get-info?page=$page"),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final newInfos = data["infos"];
+      setState(() {
+        infos.addAll(newInfos);
+        loading = false;
+        if (newInfos.length < 15) {
+          hasMore = false;
+        }
+      });
+    } else {
+      setState(() => loading = false);
+    }
+  }
+
+  String formatDate(String dateString) {
+    final date = DateTime.parse(dateString);
+    const months = [
+      "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
+      "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
+    ];
+    return "${date.day} ${months[date.month]} ${date.year}";
+  }
+
+  Future<void> deleteInfo(String id) async {
+    final token = await storage.read(key: 'session_token');
+    if (token == null) return;
+    final response = await http.post(
+      Uri.parse("https://cornaro-backend.onrender.com/delete-info"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({"id": id}),
+    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Post eliminato")));
+      loadInfos();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Errore: ${jsonDecode(response.body)['message']}")),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: AppColors.text),
+        title: Text(
+          "Gestisci Info",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: infos.isEmpty && loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: infos.length + (hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= infos.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final item = infos[index];
+                final isAlert = item["type"] == "alert";
+                final date = formatDate(item["createdAt"]);
+                return Card(
+                  color: AppColors.contrast,
+                  elevation: 2,
+                  shadowColor: AppColors.text.withOpacity(0.05),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item["title"],
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                            color: AppColors.text,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: isAlert
+                                              ? AppColors.red.withOpacity(0.2)
+                                              : AppColors.primary.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          isAlert ? "ALERT" : "INFO",
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isAlert ? AppColors.red : AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    item["message"],
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 14,
+                                      color: AppColors.text.withOpacity(0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ModifyInfoPage(
+                                            id: item["_id"],
+                                            initialTitle: item["title"],
+                                            initialMessage: item["message"],
+                                            initialType: item["type"],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: SvgPicture.asset(
+                                      "assets/icons/edit.svg",
+                                      height: 22,
+                                      width: 22,
+                                      colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        barrierColor: AppColors.text.withOpacity(0.05),
+                                        builder: (_) => AlertDialog(
+                                          backgroundColor: AppColors.contrast,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          content: const Text("Sei sicuro di voler eliminare questo post? Questa è un'azione irreversibile"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context),
+                                              child: Text("Annulla", style: TextStyle(color: AppColors.text),),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                deleteInfo(item["_id"]);
+                                              },
+                                              child: Text(
+                                                "Elimina",
+                                                style: TextStyle(color: AppColors.red),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    child: SvgPicture.asset(
+                                      "assets/icons/delete.svg",
+                                      height: 22,
+                                      width: 22,
+                                      colorFilter: ColorFilter.mode(AppColors.red, BlendMode.srcIn),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                date,
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: 12,
+                                  color: AppColors.text.withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class DetailPage extends StatefulWidget {
   final String title;
   final String message;
   final String type;
@@ -1974,19 +2441,43 @@ class DetailPage extends StatelessWidget {
   });
 
   @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool pinned = false;
+
+  @override
   Widget build(BuildContext context) {
-    final isAlert = type == "alert";
+    final isAlert = widget.type == "alert";
     final iconPath = isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
     final iconColor = isAlert ? AppColors.red : AppColors.primary;
 
     String formatDate(String dateString) {
       final parts = dateString.split('/');
-      final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+      final date = DateTime(
+        int.parse(parts[2]),
+        int.parse(parts[1]),
+        int.parse(parts[0]),
+      );
 
       const months = [
-          "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
-        ];
-        return "${date.day} ${months[date.month]} ${date.year}";
+        "",
+        "GENNAIO",
+        "FEBBRAIO",
+        "MARZO",
+        "APRILE",
+        "MAGGIO",
+        "GIUGNO",
+        "LUGLIO",
+        "AGOSTO",
+        "SETTEMBRE",
+        "OTTOBRE",
+        "NOVEMBRE",
+        "DICEMBRE"
+      ];
+
+      return "${date.day} ${months[date.month]} ${date.year}";
     }
 
     return Scaffold(
@@ -1994,17 +2485,31 @@ class DetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.bgGrey,
         surfaceTintColor: Colors.transparent,
-        /* title: Text(title, style: TextStyle(fontSize: 18)), */
-        centerTitle: true,
+        title: Align(
+          alignment: Alignment.centerRight,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                pinned = !pinned;
+              });
+            },
+            child: SvgPicture.asset(
+              pinned ? "assets/icons/pin_on.svg" : "assets/icons/pin_off.svg",
+              colorFilter: ColorFilter.mode(AppColors.text, BlendMode.srcIn),
+              width: 23,
+            ),
+          ),
+        ),
+        iconTheme: IconThemeData(color: AppColors.text),
+        centerTitle: false,
       ),
-
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              widget.title,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
@@ -2020,7 +2525,7 @@ class DetailPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  formatDate(date),
+                  formatDate(widget.date),
                   style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
                 ),
               ],
@@ -2045,9 +2550,190 @@ class DetailPage extends StatelessWidget {
             ), */
             const SizedBox(height: 16),
             Text(
-              message,
+              widget.message,
               style: const TextStyle(fontSize: 16),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ModifyInfoPage extends StatefulWidget {
+  final String id;
+  final String initialTitle;
+  final String initialMessage;
+  final String initialType;
+
+  const ModifyInfoPage({
+    super.key,
+    required this.id,
+    required this.initialTitle,
+    required this.initialMessage,
+    required this.initialType,
+  });
+
+  @override
+  State<ModifyInfoPage> createState() => _ModifyInfoPageState();
+}
+
+class _ModifyInfoPageState extends State<ModifyInfoPage> {
+  final storage = FlutterSecureStorage();
+  final _titleController = TextEditingController();
+  final _messageController = TextEditingController();
+  String? _selectedType;
+  bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.initialTitle;
+    _messageController.text = widget.initialMessage;
+    _selectedType = widget.initialType;
+  }
+
+  Future<void> _submitModification() async {
+    final title = _titleController.text.trim();
+    final message = _messageController.text.trim();
+
+    if (title.isEmpty || message.isEmpty || _selectedType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Tutti i campi sono obbligatori")),
+      );
+      return;
+    }
+
+    setState(() => loading = true);
+
+    final token = await storage.read(key: 'session_token');
+    if (token == null) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sessione scaduta, effettua il login")),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://cornaro-backend.onrender.com/update-info"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "id": widget.id,
+          "title": title,
+          "message": message,
+          "type": _selectedType,
+        }),
+      );
+
+      setState(() => loading = false);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Avviso modificato con successo!")),
+        );
+        Navigator.of(context).pop();
+      } else {
+        final error = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Errore: $error")),
+        );
+      }
+    } catch (e) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Errore: $e")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgGrey,
+      appBar: AppBar(
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: AppColors.text),
+        title: Text(
+          "Modifica Info",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: modernInput("Titolo"),
+              style: TextStyle(color: AppColors.text, fontFamily: "Poppins"),
+            ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: TextField(
+                controller: _messageController,
+                decoration: modernInput("Messaggio"),
+                style: TextStyle(color: AppColors.text, fontFamily: "Poppins"),
+                keyboardType: TextInputType.multiline,
+                minLines: 5,
+                maxLines: null,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.bgGrey,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.borderGrey, width: 1),
+              ),
+              child: DropdownButton<String>(
+                value: _selectedType,
+                hint: Text(
+                  "Seleziona Tipo",
+                  style: TextStyle(
+                    color: AppColors.text.withOpacity(0.6),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+                isExpanded: true,
+                underline: const SizedBox(),
+                dropdownColor: AppColors.contrast,
+                style: TextStyle(
+                  color: AppColors.text,
+                  fontSize: 14,
+                  fontFamily: "Poppins",
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: "info",
+                    child: Text("Info", style: TextStyle(color: AppColors.text)),
+                  ),
+                  DropdownMenuItem(
+                    value: "alert",
+                    child: Text("Alert", style: TextStyle(color: AppColors.text)),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedType = value);
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            modernButton("Modifica", loading, _submitModification),
           ],
         ),
       ),

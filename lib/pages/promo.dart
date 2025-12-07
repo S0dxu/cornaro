@@ -29,13 +29,12 @@ class PromoPage extends StatelessWidget {
   void _showPromoCode(BuildContext context, String name, String code, String discount, String image) {
     showModalBottomSheet(
       context: context,
-      barrierColor: AppColors.text.withOpacity(0.05),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.contrast,
+            color: AppColors.bgGrey,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SingleChildScrollView(

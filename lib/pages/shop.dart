@@ -1550,9 +1550,8 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
                 List<String> classi = ['Tutte', '1ª', '2ª', '3ª', '4ª', '5ª'];
                 showModalBottomSheet(
                   context: context,
-                  barrierColor: AppColors.text.withOpacity(0.05),
                   isScrollControlled: true,
-                  backgroundColor: AppColors.contrast,
+                  backgroundColor: AppColors.bgGrey,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(20),
@@ -1571,26 +1570,12 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 20),
-                                      Center(
-                                        child: Container(
-                                          width: 40,
-                                          height: 5,
-                                          margin: const EdgeInsets.only(
-                                            bottom: 16,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xffcccccc),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
                                       const Center(
                                         child: Text(
                                           "Filtra per",
                                           style: TextStyle(
-                                            fontSize: 20,
+                                            fontSize: 18,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
