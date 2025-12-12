@@ -301,78 +301,19 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final List<Map<String, String>> cards = [
     {
-      "username": "luca.barbone",
-      "message": "Spotto tipa figa con il pizzetto e mullet (5cs)",
+      "username": "giacomo.borille",
+      "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       "profilo": "assets/icons/jack.png",
     },
     {
       "username": "daduzz",
       "message":
-          "Spotto prof con i capelli lunghi che sembra un surfista anni 70",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
     },
     {
-      "username": "giacomo.borille",
-      "message":
-          "scherzavo, spotto il barbone fuori scuola che si è scopato la Marta",
+      "username": "barbata.luca",
+      "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
       "profilo": "assets/icons/profile2.png",
-    },
-    {
-      "username": "giacomo.borille",
-      "message": "Spotto me stesso (son troppo figo)",
-    },
-    {
-      "username": "luca.barbone",
-      "message": "Spotto tipa figa con il pizzetto e mullet (5cs)",
-    },
-    {
-      "username": "daduzz",
-      "message":
-          "Spotto prof con i capelli lunghi che sembra un surfista anni 70",
-    },
-    {
-      "username": "giacomo.borille",
-      "message":
-          "scherzavo, spotto il barbone fuori scuola che si è scopato la Marta",
-    },
-    {
-      "username": "giacomo.borille",
-      "message": "Spotto me stesso (son troppo figo)",
-    },
-    {
-      "username": "luca.barbone",
-      "message": "Spotto tipa figa con il pizzetto e mullet (5cs)",
-    },
-    {
-      "username": "daduzz",
-      "message":
-          "Spotto prof con i capelli lunghi che sembra un surfista anni 70",
-    },
-    {
-      "username": "giacomo.borille",
-      "message":
-          "scherzavo, spotto il barbone fuori scuola che si è scopato la Marta",
-    },
-    {
-      "username": "giacomo.borille",
-      "message": "Spotto me stesso (son troppo figo)",
-    },
-    {
-      "username": "luca.barbone",
-      "message": "Spotto tipa figa con il pizzetto e mullet (5cs)",
-    },
-    {
-      "username": "daduzz",
-      "message":
-          "Spotto prof con i capelli lunghi che sembra un surfista anni 70",
-    },
-    {
-      "username": "giacomo.borille",
-      "message":
-          "scherzavo, spotto il barbone fuori scuola che si è scopato la Marta",
-    },
-    {
-      "username": "giacomo.borille",
-      "message": "Spotto me stesso (son troppo figo)",
     },
   ];
 
@@ -621,8 +562,8 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> comments = [
-      {"username": "alice", "message": "99% è finocchio", "profile": "assets/icons/profile2.png"},
-      {"username": "frizzica", "message": "confermo", "profile": ""},
+      {"username": "alice", "message": "commento 1", "profile": "assets/icons/profile2.png"},
+      {"username": "francesco", "message": "commento 2", "profile": ""},
     ];
 
     return Scaffold(

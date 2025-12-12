@@ -14,32 +14,23 @@ class _AddPageState extends State<AddPage> {
   
   List<Map<String, dynamic>> posts = [
     {
-      "author": "Alessia Troia",
-      "handle": "@latroiona",
+      "author": "Davide Silvano",
+      "handle": "@daduzz",
       "time": "5h",
-      "text": "spotto tipo troppo figo vestito come un barbone con caschetto da muratore",
-      "images": ["assets/icons/x/jack.png"],
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "images": ["assets/icons/x/example.jpg"],
       "likes": 420,
       "comments": 37
     },
     {
       "author": "Giacomo Borille",
-      "handle": "@jacksborra",
+      "handle": "@giacomo.borille",
       "time": "20h",
-      "text": "Boia raga scusate per il cesso nel bagno dei maschi ma non ce la facevo più",
-      "images": ["assets/icons/x/cesso.png"],
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "images": ["assets/icons/x/example.jpg"],
       "likes": 13,
       "comments": 3
     },
-    {
-      "author": "Davide Silvano",
-      "handle": "@dade",
-      "time": "1d",
-      "text": "Se votate la lista comunista giuro tiro giu tutti i porchi",
-      "images": [],
-      "likes": 112,
-      "comments": 4
-    }
   ];
 
 
@@ -249,7 +240,7 @@ class _AddPageState extends State<AddPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "si chiama giacoma borilla",
+                  "top commento",
                   style: const TextStyle(fontSize: 15),
                 ),
                 const SizedBox(height: 10),

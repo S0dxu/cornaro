@@ -14,32 +14,20 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  runApp(const MyApp());
+  final theme = await storage.read(key: "theme") ?? "light";
+  currentTheme = theme;
+  applySystemColors();
+
+  final token = await storage.read(key: 'session_token');
+  final Widget initialPage =
+      (token != null && token.isNotEmpty) ? const HomePage() : const LoginPage();
+
+  runApp(MyApp(home: initialPage));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    refreshApp = () => setState(() {
-          applySystemColors();
-        });
-    _loadTheme();
-  }
-
-  Future<void> _loadTheme() async {
-    final t = await storage.read(key: "theme") ?? "light";
-    currentTheme = t;
-    applySystemColors();
-    setState(() {});
-  }
+class MyApp extends StatelessWidget {
+  final Widget home;
+  const MyApp({super.key, required this.home});
 
   @override
   Widget build(BuildContext context) {
@@ -89,49 +77,7 @@ class _MyAppState extends State<MyApp> {
           bodyMedium: TextStyle(color: AppColors.text),
         ),
       ),
-      home: const AuthDecider(),
-    );
-  }
-}
-
-class AuthDecider extends StatefulWidget {
-  const AuthDecider({super.key});
-
-  @override
-  State<AuthDecider> createState() => _AuthDeciderState();
-}
-
-class _AuthDeciderState extends State<AuthDecider> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkToken();
-    });
-  }
-
-  Future<void> _checkToken() async {
-    final token = await storage.read(key: 'session_token');
-    if (token != null && token.isNotEmpty) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgGrey,
-      body: Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
-      ),
+      home: home,
     );
   }
 }

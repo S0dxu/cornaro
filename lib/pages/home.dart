@@ -11,34 +11,13 @@ import 'package:cornaro/theme.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-
-/* class AppColors {
-  static Color get primary =>
-      currentTheme == "dark" ? const Color.fromARGB(255, 33, 87, 179) : const Color.fromARGB(255, 33, 87, 179);
-
-  static Color get bgGrey =>
-      currentTheme == "dark" ? const Color.fromARGB(255, 3, 3, 3) : const Color(0xfff4f4f4);
-
-  static Color get borderGrey =>
-      currentTheme == "dark" ? const Color.fromARGB(204, 43, 43, 43) : const Color(0xCCdadada);
-
-  static Color get text =>
-      currentTheme == "dark" ? const Color(0xffffffff) : const Color(0xff000000);
-
-  static Color get contrast =>
-      currentTheme == "dark" ? const Color(0xff000000) : const Color(0xffffffff);
-
-  static Color get red =>
-      currentTheme == "dark" ? const Color(0xffff6f6a) : const Color(0xffe53935);
-} */
+import 'package:shimmer/shimmer.dart';
 
 ValueNotifier<String> themeNotifier = ValueNotifier(currentTheme);
-
 final storage = FlutterSecureStorage();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -49,11 +28,20 @@ class _HomePageState extends State<HomePage> {
   String name = "";
   String profileImage = "assets/icons/profile.png";
 
-  final List<Widget> _pages = [];
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+
+    _pages = [
+      HomeWidget(userName: userName, name: name, profileImage: profileImage),
+      const ChatPage(),
+      const AddPage(),
+      const ShopPage(),
+      const PromoPage(),
+    ];
+
     _loadUserData();
   }
 
@@ -66,13 +54,12 @@ class _HomePageState extends State<HomePage> {
       name = n;
       userName = u;
       profileImage = p;
-      _pages.addAll([
-        HomeWidget(userName: userName, name: name, profileImage: profileImage),
-        const ChatPage(),
-        const AddPage(),
-        const ShopPage(),
-        const PromoPage(),
-      ]);
+
+      _pages[0] = HomeWidget(
+        userName: userName,
+        name: name,
+        profileImage: profileImage,
+      );
     });
   }
 
@@ -107,9 +94,7 @@ class _HomePageState extends State<HomePage> {
       valueListenable: themeNotifier,
       builder: (context, value, child) {
         return Scaffold(
-          body: _pages.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : _pages[_selectedIndex],
+          body: _pages[_selectedIndex],
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
               border: Border(
@@ -169,55 +154,17 @@ class _HomeWidgetState extends State<HomeWidget> {
   double maxMessages = 15;
   int _adminTapCount = 0;
   Timer? _resetTapTimer;
-
-  /* List<Map<String, String>> generateMessages() {
-    final now = DateTime.now();
-    final List<Map<String, String>> texts = [
-      {"text": "Attenzione: l'acqua non è potabile.", "type": "alert"},
-      {"text": "Nuova manutenzione programmata venerdì.", "type": "info"},
-      {"text": "Aggiornamento orari apertura sportello di matematica.", "type": "info"},
-      {"text": "Servizio raccolta differenziata posticipato.", "type": "info"},
-      {"text": "Allerta meteo per forti piogge. Ricordarsi di portare ombrelli e/o ponchi", "type": "alert"},
-      {"text": "Evento locale: festa di San Martino.", "type": "info"},
-      {"text": "Nuove offerte nel negozio del paese.", "type": "info"},
-      {"text": "Interruzione temporanea elettricità.", "type": "alert"},
-      {"text": "Avviso: chiusura strade per lavori pubblici.", "type": "alert"},
-      {"text": "Promozione acqua minerale in negozio.", "type": "info"},
-      {"text": "Nuovo avviso pubblico affisso in bacheca.", "type": "alert"},
-      {"text": "Aggiornamento sul servizio navetta.", "type": "info"},
-      {"text": "Riapertura biblioteca comunale.", "type": "info"},
-      {"text": "Mercatino domenicale spostato in piazza centrale.", "type": "info"},
-      {"text": "Servizio di pulizia straordinario sabato.", "type": "info"},
-      {"text": "Attenzione: lavori fognari in corso.", "type": "alert"},
-      {"text": "Nuova ordinanza per la raccolta rifiuti.", "type": "alert"},
-      {"text": "Evento sportivo sabato alle 18.", "type": "info"},
-      {"text": "Sospensione erogazione gas per manutenzione.", "type": "alert"},
-      {"text": "Comunicazione importante dal comune.", "type": "info"},
-    ];
-    return List.generate(20, (i) {
-      final date = now.subtract(Duration(days: i ~/ 3));
-      return {
-        "text": texts[i]["text"]!,
-        "type": texts[i]["type"]!,
-        "date": "${date.day}/${date.month}/${date.year}",
-      };
-    });
-  }
- */
+  bool isLoading = true;
 
   void _handleAdminTap() async {
     _adminTapCount++;
-
     _resetTapTimer?.cancel();
-
     _resetTapTimer = Timer(const Duration(seconds: 1), () {
       _adminTapCount = 0;
     });
-
     if (_adminTapCount >= 2) {
       _adminTapCount = 0;
       _resetTapTimer?.cancel();
-
       final isAdmin = await _checkIsAdmin();
       if (isAdmin) {
         Navigator.push(
@@ -228,11 +175,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
-
   Future<bool> _checkIsAdmin() async {
     final token = await storage.read(key: 'session_token');
     if (token == null) return false;
-
     try {
       final response = await http.get(
         Uri.parse("https://cornaro-backend.onrender.com/is-admin"),
@@ -241,108 +186,88 @@ class _HomeWidgetState extends State<HomeWidget> {
           "Content-Type": "application/json",
         },
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['isAdmin'] ?? false;
       }
-    } catch (e) {
-      print("Errore controllo admin: $e");
-    }
-
+    } catch (_) {}
     return false;
   }
 
-
   Future<void> _loadMessages() async {
-  final savedMessages = await storage.read(key: 'messages');
-  if (savedMessages != null) {
-    final List<dynamic> storedList = jsonDecode(savedMessages);
-    setState(() {
+    final savedMessages = await storage.read(key: 'messages');
+
+    if (savedMessages != null) {
+      final List<dynamic> storedList = jsonDecode(savedMessages);
       allMessages = storedList.map<Map<String, String>>((item) => Map<String, String>.from(item)).toList();
       filteredMessages = List.from(allMessages);
       _filterMessages();
-    });
-  }
+    }
 
-  try {
-    final token = await storage.read(key: 'session_token');
-    if (token == null) return;
-
-    final response = await http.get(
-      Uri.parse("https://cornaro-backend.onrender.com/get-info"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      final List<dynamic> messagesData = data['infos'] ?? [];
-
-      final List<Map<String, String>> messages = messagesData.map<Map<String, String>>((item) {
-        return {
-          "title": item["title"] ?? "",
-          "text": item["message"] ?? "",
-          "type": item["type"] ?? "info",
-          "date": item["createdAt"] != null
-              ? _formatBackendDate(item["createdAt"])
-              : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-        };
-      }).toList();
-
-      bool isDifferent = jsonEncode(messages) != jsonEncode(allMessages);
-      if (isDifferent) {
-        await storage.write(key: 'messages', value: jsonEncode(messages));
-        setState(() {
+    try {
+      final token = await storage.read(key: 'session_token');
+      if (token == null) return;
+      final response = await http.get(
+        Uri.parse("https://cornaro-backend.onrender.com/get-info"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> messagesData = data['infos'] ?? [];
+        final List<Map<String, String>> messages = messagesData.map<Map<String, String>>((item) {
+          return {
+            "title": item["title"] ?? "",
+            "text": item["message"] ?? "",
+            "type": item["type"] ?? "info",
+            "date": item["createdAt"] != null
+                ? _formatBackendDate(item["createdAt"])
+                : "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+          };
+        }).toList();
+        bool isDifferent = jsonEncode(messages) != jsonEncode(allMessages);
+        if (isDifferent) {
+          await storage.write(key: 'messages', value: jsonEncode(messages));
           allMessages = messages;
           filteredMessages = List.from(allMessages);
           _filterMessages();
-        });
+        }
       }
-    } else {
-      print("Errore caricamento messaggi: ${response.statusCode}");
-    }
-  } catch (e) {
-    print("Errore fetch messaggi: $e");
-  }
-}
+    } catch (_) {}
 
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   String _formatBackendDate(String isoDate) {
     final dt = DateTime.parse(isoDate).toLocal();
     return "${dt.day}/${dt.month}/${dt.year}";
   }
 
-
   @override
   void initState() {
     super.initState();
-
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: AppColors.primary,
         statusBarIconBrightness: Brightness.light,
       ),
     );
-
     _loadMaxMessages();
     _loadMessages();
     searchController.addListener(_filterMessages);
   }
 
-
   Future<void> _loadMaxMessages() async {
     String? saved = await storage.read(key: 'max_messages');
     if (saved != null) {
-      setState(() {
-        maxMessages = double.tryParse(saved) ?? 15;
-      });
+      maxMessages = double.tryParse(saved) ?? 15;
     }
     _filterMessages();
   }
-
 
   Future<void> _saveMaxMessages() async {
     await storage.write(key: 'max_messages', value: maxMessages.toInt().toString());
@@ -350,7 +275,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _filterMessages() {
     final query = searchController.text.toLowerCase();
-
     List<Map<String, String>> temp = allMessages.where((msg) {
       bool matchesSearch = msg["text"]!.toLowerCase().contains(query);
       bool matchesType = filterType == "all" || msg["type"] == filterType;
@@ -367,11 +291,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       temp = temp.sublist(0, maxMessages.toInt());
     }
 
-    setState(() {
-      filteredMessages = temp;
-    });
+    filteredMessages = temp;
+    setState(() {});
   }
-
 
   @override
   void dispose() {
@@ -390,25 +312,18 @@ class _HomeWidgetState extends State<HomeWidget> {
     final now = DateTime.now();
     final yesterday = now.subtract(const Duration(days: 1));
     final tomorrow = now.add(const Duration(days: 1));
-
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return "OGGI";
-    } else if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) {
-      return "IERI";
-    } else if (date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day) {
-      return "DOMANI";
-    } else {
-      const months = [
-        "", "GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO", "SET", "OTT", "NOV", "DIC"
-      ];
-      return "${date.day} ${months[date.month]} ${date.year}";
-    }
+    if (date.year == now.year && date.month == now.month && date.day == now.day) return "OGGI";
+    if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) return "IERI";
+    if (date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day) return "DOMANI";
+    const months = [
+      "", "GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO", "SET", "OTT", "NOV", "DIC"
+    ];
+    return "${date.day} ${months[date.month]} ${date.year}";
   }
 
   String formatFullDate(String dateString) {
     final parts = dateString.split('/');
     final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-
     const months = [
       "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
       "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
@@ -416,7 +331,74 @@ class _HomeWidgetState extends State<HomeWidget> {
     return "${date.day} ${months[date.month]} ${date.year}";
   }
 
- @override
+  Widget shimmerItem() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.borderGrey,
+      highlightColor: AppColors.text.withOpacity(0.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 18, bottom: 10, top: 16, right: 18),
+            child: Container(
+              height: 14,
+              width: 60,
+              color: AppColors.text.withOpacity(0.15),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.text.withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  height: 44,
+                  width: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.text.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 16,
+                        color: AppColors.text.withOpacity(0.15),
+                        margin: const EdgeInsets.only(bottom: 6),
+                      ),
+                      Container(
+                        height: 14,
+                        color: AppColors.text.withOpacity(0.15),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  height: 18,
+                  width: 18,
+                  color: AppColors.text.withOpacity(0.15),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     Map<String, List<Map<String, String>>> grouped = {};
     for (var msg in filteredMessages) {
@@ -607,206 +589,189 @@ class _HomeWidgetState extends State<HomeWidget> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...grouped.entries.toList().asMap().entries.map((groupEntry) {
-                    final index = groupEntry.key;
-                    final entry = groupEntry.value;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                          left: 18, bottom: 5, top: 12, right: 18),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                formatDate(entry.key),
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.3,
-                                    color: AppColors.text.withOpacity(0.85)),
-                              ),
-                              if (index == 0)
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ViewPage(),
-                                    ),
-                                  );
-                                },
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "Visualizza tutti",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    SvgPicture.asset(
-                                      "assets/icons/arrow-right.svg",
-                                      height: 14,
-                                      width: 14,
-                                      colorFilter: ColorFilter.mode(
-                                        AppColors.primary,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                  ],
+                  if (isLoading)
+                    Column(
+                      children: List.generate(6, (_) => shimmerItem()),
+                    )
+                  else
+                    ...grouped.entries.toList().asMap().entries.map((groupEntry) {
+                      final index = groupEntry.key;
+                      final entry = groupEntry.value;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 18, bottom: 5, top: 12, right: 18),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formatDate(entry.key),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.3,
+                                      color: AppColors.text.withOpacity(0.85)),
                                 ),
-                              )
-                            ],
-                          ),
-                        ),
-                        ...entry.value.map((item) {
-                          final isAlert = item["type"] == "alert";
-                          final iconPath =
-                              isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
-                          final iconColor = isAlert ? AppColors.red : AppColors.primary;
-                          final iconBgColor =
-                              isAlert ? AppColors.red.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
-                          return GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            /* onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => DetailPage(
-                                    title: item["title"]!,
-                                    message: item["text"]!,
-                                    type: item["type"]!,
-                                    date: item["date"]!,
-                                  ),
-                                ),
-                              );
-                            }, */
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) {
-                                  return DraggableScrollableSheet(
-                                    initialChildSize: 0.6,
-                                    minChildSize: 0.4,
-                                    maxChildSize: 0.9,
-                                    expand: false,
-                                    builder: (context, scrollController) {
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: AppColors.bgGrey,
-                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                        ),
-                                        child: SingleChildScrollView(
-                                          controller: scrollController,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
-                                                Center(
-                                                  child: Text(
-                                                    item["title"]!,
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                Text(
-                                                  item["text"]!,
-                                                  style: const TextStyle(fontSize: 15),
-                                                ),
-                                                const SizedBox(height: 24),
-                                                Row(
-                                                  children: [
-                                                    SvgPicture.asset(
-                                                      item["type"] == "alert" ? "assets/icons/alert.svg" : "assets/icons/info.svg",
-                                                      colorFilter: ColorFilter.mode(
-                                                          item["type"] == "alert" ? AppColors.red : AppColors.primary,
-                                                          BlendMode.srcIn),
-                                                      width: 22,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      formatFullDate(item["date"]!),
-                                                      style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                if (index == 0)
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ViewPage(),
                                         ),
                                       );
                                     },
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14
-                              ),
-                              decoration: BoxDecoration(
-                              border: Border(
-                              bottom: BorderSide(
-                              color: AppColors.borderGrey, width: 1))),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 44,
-                                    width: 44,
-                                    decoration:
-                                        BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
-                                    child: Center(
-                                      child: SvgPicture.asset(iconPath,
-                                          height: 24,
-                                          width: 24,
-                                          colorFilter:
-                                              ColorFilter.mode(iconColor, BlendMode.srcIn)),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "Visualizza tutti",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        SvgPicture.asset(
+                                          "assets/icons/arrow-right.svg",
+                                          height: 14,
+                                          width: 14,
+                                          colorFilter: ColorFilter.mode(
+                                            AppColors.primary,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                              ],
+                            ),
+                          ),
+                          ...entry.value.map((item) {
+                            final isAlert = item["type"] == "alert";
+                            final iconPath = isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
+                            final iconColor = isAlert ? AppColors.red : AppColors.primary;
+                            final iconBgColor = isAlert ? AppColors.red.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
+                            return GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) {
+                                    return DraggableScrollableSheet(
+                                      initialChildSize: 0.6,
+                                      minChildSize: 0.4,
+                                      maxChildSize: 0.9,
+                                      expand: false,
+                                      builder: (context, scrollController) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: AppColors.bgGrey,
+                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                          ),
+                                          child: SingleChildScrollView(
+                                            controller: scrollController,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
+                                                  Center(
+                                                    child: Text(
+                                                      item["title"]!,
+                                                      textAlign: TextAlign.center,
+                                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  Text(
+                                                    item["text"]!,
+                                                    style: const TextStyle(fontSize: 15),
+                                                  ),
+                                                  const SizedBox(height: 24),
+                                                  Row(
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        item["type"] == "alert" ? "assets/icons/alert.svg" : "assets/icons/info.svg",
+                                                        colorFilter: ColorFilter.mode(
+                                                            item["type"] == "alert" ? AppColors.red : AppColors.primary,
+                                                            BlendMode.srcIn),
+                                                        width: 22,
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        formatFullDate(item["date"]!),
+                                                        style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: AppColors.borderGrey,
+                                      width: 1,
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                    item["text"]!,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w400),
-                                  )),
-                                  const SizedBox(width: 10),
-                                  SvgPicture.asset("assets/icons/arrow-right.svg",
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 44,
+                                      width: 44,
+                                      decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                                      child: Center(
+                                        child: SvgPicture.asset(
+                                          iconPath,
+                                          height: 24,
+                                          width: 24,
+                                          colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Text(
+                                        item["text"]!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    SvgPicture.asset(
+                                      "assets/icons/arrow-right.svg",
                                       height: 18,
                                       width: 18,
-                                      colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)
-                                  ),
-                                ],
+                                      colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(height: 10),
-                      ],
-                    );
-                  }),
-                  /* Image.asset(
-                    "assets/icons/ads1.png",
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ), */
-                  /* Image.asset(
-                    "assets/icons/ads2.png",
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ) */
+                            );
+                          }),
+                          const SizedBox(height: 10),
+                        ],
+                      );
+                    }),
                 ],
               ),
             ),
@@ -819,127 +784,160 @@ class _HomeWidgetState extends State<HomeWidget> {
                 bottomRight: Radius.circular(70),
               ),
             ),
-            child: Container(
+            child: SizedBox(
               height: 110,
               width: double.infinity,
-              child: Column(
+              child: Stack(
                 children: [
-                  const SizedBox(height: 26),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                      GestureDetector(
-                        onTap: _handleAdminTap,
+                  Positioned.fill(
+                    child: OverflowBox(
+                      maxWidth: double.infinity,
+                      maxHeight: 110,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(28),
+                          bottomRight: Radius.circular(28),
+                        ),
+                        child: ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withOpacity(0.0),
+                                Colors.white.withOpacity(0.08),
+                              ],
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.dstIn,
+                          child: Image.asset(
+                            "assets/icons/bground.png",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 26),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () {
-                                showGeneralDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  barrierLabel: "Close",
-                                  barrierColor: AppColors.text.withOpacity(0.05),
-                                  transitionDuration: const Duration(milliseconds: 200),
-                                  pageBuilder: (_, __, ___) {
-                                    final double size = MediaQuery.of(context).size.width - 80;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: Center(
-                                          child: GestureDetector(
-                                            onTap: () {},
-                                            child: ClipOval(
-                                              child: Container(
-                                                width: size,
-                                                height: size,
-                                                color: AppColors.bgGrey,
-                                                child: InteractiveViewer(
-                                                  child: widget.profileImage.isNotEmpty
-                                                      ? Image.network(
-                                                          widget.profileImage,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.asset(
-                                                          "assets/icons/profile.png",
-                                                          fit: BoxFit.cover,
-                                                        ),
+                              onTap: _handleAdminTap,
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        barrierLabel: "Close",
+                                        barrierColor: AppColors.text.withOpacity(0.05),
+                                        transitionDuration: const Duration(milliseconds: 200),
+                                        pageBuilder: (_, __, ___) {
+                                          final double size = MediaQuery.of(context).size.width - 80;
+                                          return GestureDetector(
+                                            onTap: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: Center(
+                                                child: GestureDetector(
+                                                  onTap: () {},
+                                                  child: ClipOval(
+                                                    child: Container(
+                                                      width: size,
+                                                      height: size,
+                                                      color: AppColors.bgGrey,
+                                                      child: InteractiveViewer(
+                                                        child: widget.profileImage.isNotEmpty
+                                                            ? Image.network(
+                                                                widget.profileImage,
+                                                                fit: BoxFit.cover,
+                                                              )
+                                                            : Image.asset(
+                                                                "assets/icons/profile.png",
+                                                                fit: BoxFit.cover,
+                                                              ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: AppColors.contrast.withOpacity(0.2),
+                                      backgroundImage: widget.profileImage.isNotEmpty
+                                          ? NetworkImage(widget.profileImage)
+                                          : const AssetImage("assets/icons/profile.png") as ImageProvider,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(widget.name,
+                                          style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white)),
+                                      Text(
+                                        widget.userName != "" ? "@${widget.userName}" : "",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: CircleAvatar(
-                                radius: 28,
-                                backgroundColor: AppColors.contrast.withOpacity(0.2),
-                                backgroundImage: widget.profileImage.isNotEmpty
-                                    ? NetworkImage(widget.profileImage)
-                                    : const AssetImage("assets/icons/profile.png") as ImageProvider,
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(widget.name,
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white)),
-                                Text(
-                                  widget.userName != "" ? "@${widget.userName}" : "",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white,
-                                  ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => SettingsPage(
+                                        onThemeChanged: () {
+                                          setState(() {});
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: SvgPicture.asset(
+                                  "assets/icons/settings-svgrepo-com.svg",
+                                  height: 24,
+                                  width: 24,
+                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SettingsPage(
-                                  onThemeChanged: () {
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          child: SvgPicture.asset(
-                            "assets/icons/settings-svgrepo-com.svg",
-                            height: 24,
-                            width: 24,
-                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                          ),
-                        ),
-                      ),
-
+                      const SizedBox(height: 20),
                     ],
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                ],
+              ),
             ),
           ),
-      )],
+        ],
       ),
     );
   }
@@ -1445,10 +1443,8 @@ class _ViewPageState extends State<ViewPage> {
   @override
   void initState() {
     super.initState();
-
-    fetchMessages(); 
+    fetchMessages();
     searchController.addListener(_filterMessages);
-
     scrollController.addListener(() {
       if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 100) {
         fetchMessages(page: currentPage + 1);
@@ -1465,6 +1461,7 @@ class _ViewPageState extends State<ViewPage> {
       ),
     );
     searchController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -1474,8 +1471,7 @@ class _ViewPageState extends State<ViewPage> {
   }
 
   Future<void> fetchMessages({int page = 1}) async {
-    if (isLoading) return;
-    if (page > totalPages) return;
+    if (isLoading || page > totalPages) return;
 
     setState(() => isLoading = true);
 
@@ -1506,12 +1502,9 @@ class _ViewPageState extends State<ViewPage> {
           _filterMessages();
           currentPage = page;
         });
-      } else {
-        print("Errore nel recupero dati: ${response.statusCode}");
       }
-    } catch (e) {
-      print("Errore: $e");
-    } finally {
+    } catch (e) {}
+    finally {
       setState(() => isLoading = false);
     }
   }
@@ -1556,12 +1549,75 @@ class _ViewPageState extends State<ViewPage> {
   String formatFullDate(String dateString) {
     final parts = dateString.split('/');
     final date = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-
-    const months = [
-      "", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
-      "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
-    ];
+    const months = ["", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"];
     return "${date.day} ${months[date.month]} ${date.year}";
+  }
+
+  Widget shimmerItem() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.borderGrey,
+      highlightColor: AppColors.text.withOpacity(0.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 18, bottom: 10, top: 16, right: 18),
+            child: Container(
+              height: 14,
+              width: 60,
+              color: AppColors.text.withOpacity(0.15),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.text.withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  height: 44,
+                  width: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.text.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 16,
+                        color: AppColors.text.withOpacity(0.15),
+                        margin: const EdgeInsets.only(bottom: 6),
+                      ),
+                      Container(
+                        height: 14,
+                        color: AppColors.text.withOpacity(0.15),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  height: 18,
+                  width: 18,
+                  color: AppColors.text.withOpacity(0.15),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
   }
 
   @override
@@ -1580,15 +1636,170 @@ class _ViewPageState extends State<ViewPage> {
       ),
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 60),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
+          SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(right: 15),
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back, color: AppColors.text),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppColors.bgGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextField(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: "Cerca",
+                              hintStyle: TextStyle(color: AppColors.text.withOpacity(0.65)),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: SvgPicture.asset(
+                                  "assets/icons/search.svg",
+                                  height: 20,
+                                  width: 20,
+                                  colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.65), BlendMode.srcIn),
+                                ),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: AppColors.bgGrey,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (context) {
+                              List<String> importanza = ['Tutte', 'Info', 'Alert'];
+                              List<String> ordinamento = ['Recenti', 'Vecchi'];
+                              return StatefulBuilder(
+                                builder: (context, setModalState) {
+                                  return SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.45,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 20),
+                                          Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
+
+                                          const Center(child: Text("Filtra per", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))),
+                                          const SizedBox(height: 25),
+
+                                          const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Importanza", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
+                                          const SizedBox(height: 10),
+
+                                          SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                                            child: Row(
+                                              children: importanza.map((item) {
+                                                final bool isSelected = filterType == item.toLowerCase() || (item == "Tutte" && filterType == "all");
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    setModalState(() {
+                                                      filterType = item == "Tutte" ? "all" : item.toLowerCase();
+                                                    });
+                                                    _filterMessages();
+                                                  },
+                                                  child: Container(
+                                                    margin: const EdgeInsets.only(right: 6),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(100),
+                                                      border: Border.all(color: isSelected ? AppColors.primary : AppColors.text.withOpacity(0.25), width: 2),
+                                                      color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+                                                    ),
+                                                    child: Text(item, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.text, fontWeight: FontWeight.w500)),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 25),
+                                          const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Data", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
+                                          const SizedBox(height: 10),
+
+                                          SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                                            child: Row(
+                                              children: ordinamento.map((item) {
+                                                final bool isSelected = (item == "Recenti" && sortDescending == true) || (item == "Vecchi" && sortDescending == false);
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    setModalState(() {
+                                                      sortDescending = item == "Recenti";
+                                                    });
+                                                    _filterMessages();
+                                                  },
+                                                  child: Container(
+                                                    margin: const EdgeInsets.only(right: 6),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(100),
+                                                      border: Border.all(color: isSelected ? AppColors.primary : AppColors.text.withOpacity(0.25), width: 2),
+                                                      color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+                                                    ),
+                                                    child: Text(item, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.text, fontWeight: FontWeight.w500)),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(color: AppColors.bgGrey, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.borderGrey, width: 1)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: SvgPicture.asset('assets/icons/filter.svg', color: AppColors.text.withOpacity(0.65)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                if (isLoading && currentPage == 1)
+                  Column(children: List.generate(6, (_) => shimmerItem()))
+                else
                   ...grouped.entries.toList().asMap().entries.map((groupEntry) {
                     final entry = groupEntry.value;
                     return Column(
@@ -1596,34 +1807,16 @@ class _ViewPageState extends State<ViewPage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 18, bottom: 5, top: 12, right: 18),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(formatDate(entry.key), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.text.withOpacity(0.85))),
-                            ],
-                          ),
+                          child: Text(formatDate(entry.key), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.3, color: AppColors.text.withOpacity(0.85))),
                         ),
                         ...entry.value.map((item) {
                           final isAlert = item["type"] == "alert";
                           final iconPath = isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg";
                           final iconColor = isAlert ? AppColors.red : AppColors.primary;
-                          final iconBgColor = isAlert ? AppColors.primary.withOpacity(0.05) : AppColors.primary.withOpacity(0.05);
+                          final iconBgColor = AppColors.primary.withOpacity(0.05);
+
                           return GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            /* onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => DetailPage(
-                                    title: item["title"]!,
-                                    message: item["text"]!,
-                                    type: item["type"]!,
-                                    date: item["date"]!,
-                                  ),
-                                ),
-                              );
-                            }, */
-                            
                             onTap: () {
                               showModalBottomSheet(
                                 context: context,
@@ -1648,7 +1841,18 @@ class _ViewPageState extends State<ViewPage> {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
+                                                Center(
+                                                  child: Container(
+                                                    width: 40,
+                                                    height: 5,
+                                                    margin: const EdgeInsets.only(bottom: 16),
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.text.withOpacity(0.15),
+                                                      borderRadius: BorderRadius.circular(10),
+                                                    ),
+                                                  ),
+                                                ),
+
                                                 Center(
                                                   child: Text(
                                                     item["title"]!,
@@ -1656,25 +1860,34 @@ class _ViewPageState extends State<ViewPage> {
                                                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                                                   ),
                                                 ),
+
                                                 const SizedBox(height: 16),
+
                                                 Text(
                                                   item["text"]!,
                                                   style: const TextStyle(fontSize: 15),
                                                 ),
+
                                                 const SizedBox(height: 24),
+
                                                 Row(
                                                   children: [
                                                     SvgPicture.asset(
-                                                      item["type"] == "alert" ? "assets/icons/alert.svg" : "assets/icons/info.svg",
+                                                      isAlert ? "assets/icons/alert.svg" : "assets/icons/info.svg",
                                                       colorFilter: ColorFilter.mode(
-                                                          item["type"] == "alert" ? AppColors.red : AppColors.primary,
-                                                          BlendMode.srcIn),
+                                                        isAlert ? AppColors.red : AppColors.primary,
+                                                        BlendMode.srcIn,
+                                                      ),
                                                       width: 22,
                                                     ),
                                                     const SizedBox(width: 8),
                                                     Text(
                                                       formatFullDate(item["date"]!),
-                                                      style: TextStyle(fontSize: 14, color: AppColors.text, fontWeight: FontWeight.w500),
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: AppColors.text,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -1690,19 +1903,26 @@ class _ViewPageState extends State<ViewPage> {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.borderGrey, width: 1))),
+                              decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(color: AppColors.borderGrey, width: 1)),
+                              ),
                               child: Row(
                                 children: [
                                   Container(
                                     height: 44,
                                     width: 44,
-                                    decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                                    decoration: BoxDecoration(
+                                      color: iconBgColor,
+                                      shape: BoxShape.circle,
+                                    ),
                                     child: Center(
                                       child: SvgPicture.asset(iconPath, height: 24, width: 24, colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)),
                                     ),
                                   ),
                                   const SizedBox(width: 14),
-                                  Expanded(child: Text(item["text"]!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w400))),
+                                  Expanded(
+                                    child: Text(item["text"]!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w400)),
+                                  ),
                                   const SizedBox(width: 10),
                                   SvgPicture.asset("assets/icons/arrow-right.svg", height: 18, width: 18, colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.5), BlendMode.srcIn)),
                                 ],
@@ -1714,156 +1934,9 @@ class _ViewPageState extends State<ViewPage> {
                       ],
                     );
                   }),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(top: 4),
-            child: Column(
-              children: [
-                Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Row(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(right: 15),
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back, color: AppColors.text),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: AppColors.bgGrey,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: TextField(
-                              controller: searchController,
-                              decoration: InputDecoration(
-                                hintText: "Cerca",
-                                hintStyle: TextStyle(color: AppColors.text.withOpacity(0.65)),
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: SvgPicture.asset(
-                                    "assets/icons/search.svg",
-                                    height: 20,
-                                    width: 20,
-                                    colorFilter: ColorFilter.mode(AppColors.text.withOpacity(0.65), BlendMode.srcIn),
-                                  ),
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 9),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: AppColors.bgGrey,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                              ),
-                              builder: (context) {
-                                List<String> importanza = ['Tutte', 'Info', 'Alert'];
-                                List<String> ordinamento = ['Recenti', 'Vecchi'];
-                                return StatefulBuilder(
-                                  builder: (context, setModalState) {
-                                    return SizedBox(
-                                      height: MediaQuery.of(context).size.height * 0.45,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(height: 20),
-                                            Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(color: AppColors.text.withOpacity(0.15), borderRadius: BorderRadius.circular(10)))),
-                                            const Center(child: Text("Filtra per", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))),
-                                            const SizedBox(height: 25),
-                                            const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Importanza", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
-                                            const SizedBox(height: 10),
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                                              child: Row(
-                                                children: importanza.map((item) {
-                                                  final bool isSelected = filterType == item.toLowerCase() || (item == "Tutte" && filterType == "all");
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      setModalState(() { filterType = item == "Tutte" ? "all" : item.toLowerCase(); });
-                                                      _filterMessages();
-                                                    },
-                                                    child: Container(
-                                                      margin: const EdgeInsets.only(right: 6),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(100),
-                                                        border: Border.all(color: isSelected ? AppColors.primary : AppColors.text.withOpacity(0.25), width: 2),
-                                                        color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-                                                      ),
-                                                      child: Text(item, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.text, fontWeight: FontWeight.w500)),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 25),
-                                            const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Text("Data", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
-                                            const SizedBox(height: 10),
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                                              child: Row(
-                                                children: ordinamento.map((item) {
-                                                  final bool isSelected = (item == "Recenti" && sortDescending == true) || (item == "Vecchi" && sortDescending == false);
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      setModalState(() { sortDescending = item == "Recenti"; });
-                                                      _filterMessages();
-                                                    },
-                                                    child: Container(
-                                                      margin: const EdgeInsets.only(right: 6),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(100),
-                                                        border: Border.all(color: isSelected ? AppColors.primary : AppColors.text.withOpacity(0.25), width: 2),
-                                                        color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-                                                      ),
-                                                      child: Text(item, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.text, fontWeight: FontWeight.w500)),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(color: AppColors.bgGrey, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.borderGrey, width: 1)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: SvgPicture.asset('assets/icons/filter.svg', color: AppColors.text.withOpacity(0.65)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+
+                if (isLoading && currentPage > 1)
+                  Column(children: List.generate(3, (_) => shimmerItem())),
               ],
             ),
           ),
