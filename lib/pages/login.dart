@@ -129,6 +129,7 @@ class _LoginPageState extends State<LoginPage> {
       final data = jsonDecode(response.body);
 
       await storage.write(key: 'session_token', value: data['token']);
+      print('Token: ${data['token']}');
       await storage.write(
         key: 'user_name',
         value: (data['firstName'] ?? '') + ' ' + (data['lastName'] ?? '')

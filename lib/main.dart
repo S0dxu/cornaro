@@ -14,20 +14,37 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  final theme = await storage.read(key: "theme") ?? "light";
-  currentTheme = theme;
-  applySystemColors();
-
   final token = await storage.read(key: 'session_token');
   final Widget initialPage =
       (token != null && token.isNotEmpty) ? const HomePage() : const LoginPage();
 
-  runApp(MyApp(home: initialPage));
+  runApp(MyApp(initialPage: initialPage));
 }
 
-class MyApp extends StatelessWidget {
-  final Widget home;
-  const MyApp({super.key, required this.home});
+class MyApp extends StatefulWidget {
+  final Widget initialPage;
+  const MyApp({super.key, required this.initialPage});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    refreshApp = () => setState(() {
+          applySystemColors();
+        });
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final t = await storage.read(key: "theme") ?? "light";
+    currentTheme = t;
+    applySystemColors();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +94,7 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(color: AppColors.text),
         ),
       ),
-      home: home,
+      home: widget.initialPage,
     );
   }
 }

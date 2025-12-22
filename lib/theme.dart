@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 String currentTheme = "light";
 
 class AppColors {
-  static Color get primary => const Color(0xFF2157B3);
+  static Color get primary => const Color(0xFF2157B3); //0xFF459da9
 
   static Color get bgGrey =>
       currentTheme == "dark"
@@ -23,7 +23,7 @@ class AppColors {
 
   static Color get contrast =>
       currentTheme == "dark"
-          ? Colors.black
+          ? Color(0xFF121214)
           : Colors.white;
 
   static Color get red =>
