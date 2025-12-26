@@ -1,7 +1,7 @@
+import 'package:cornaro/pages/inbox.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:cornaro/pages/chat.dart';
 import 'package:cornaro/pages/add.dart';
 import 'package:cornaro/pages/shop.dart';
 import 'package:cornaro/pages/promo.dart';
@@ -45,8 +45,8 @@ class _HomePageState extends State<HomePage> {
         profileImage: profileImage,
         initialCardIndex: _homeCardIndex,
       ),
-      const ChatPage(),
       const AddPage(),
+      InboxPage(),
       const ShopPage(),
       const PromoPage(),
     ];
@@ -130,10 +130,10 @@ class _BottomBar extends StatelessWidget {
         final textColor = theme == "light" ? AppColors.text : AppColors.text;
 
         return SafeArea(
-          top: false,
+          bottom: false,
           child: SizedBox(
-            height: 60,
-            child: Row(
+            height: 55,
+            /* child: Row(
               children: [
                 _item(
                   index: 0,
@@ -171,6 +171,51 @@ class _BottomBar extends StatelessWidget {
                   label: "Promo",
                   primaryColor: primaryColor,
                   textColor: textColor,
+                ),
+              ],
+            ), */
+            child: Column(
+              children: [
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    _item(
+                      index: 0,
+                      iconPath: "assets/icons/home.svg",
+                      label: "Home",
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _item(
+                      index: 1,
+                      iconPath:
+                          "assets/icons/clothes-hanger-svgrepo-com.svg",
+                      label: "Merch",
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _item(
+                      index: 2,
+                      iconPath: "assets/icons/mail-svgrepo-com (2).svg",
+                      label: "Inbox",
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _item(
+                      index: 3,
+                      iconPath: "assets/icons/book-svgrepo-com (1).svg",
+                      label: "Shop",
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _item(
+                      index: 4,
+                      iconPath: "assets/icons/present.svg",
+                      label: "Promo",
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -300,6 +345,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     return false;
   }
 
+  bool isNetworkImage(String value) {
+    return value.startsWith('http://') || value.startsWith('https://');
+  }
+
   Future<void> _loadMessages() async {
     final savedMessages = await storage.read(key: 'messages');
 
@@ -355,6 +404,22 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
   }
 
+  String truncateWords(String text, int maxChars) {
+    if (text.length <= maxChars) return text;
+
+    List<String> words = text.split(' ');
+    String result = '';
+
+    for (var word in words) {
+      if ((result + (result.isEmpty ? '' : ' ') + word).length > maxChars) {
+        break;
+      }
+      result += (result.isEmpty ? '' : ' ') + word;
+    }
+
+    return result;
+  }
+
   String _formatBackendDate(String isoDate) {
     final dt = DateTime.parse(isoDate).toLocal();
     return "${dt.day}/${dt.month}/${dt.year}";
@@ -386,12 +451,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     _filterMessages();
   }
 
-  Future<void> _saveMaxMessages() async {
+  /* Future<void> _saveMaxMessages() async {
     await storage.write(
       key: 'max_messages',
       value: maxMessages.toInt().toString(),
     );
-  }
+  } */
 
   void _filterMessages() {
     final query = searchController.text.toLowerCase();
@@ -919,6 +984,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 isAlert
                                     ? AppColors.red.withOpacity(0.05)
                                     : AppColors.primary.withOpacity(0.05);
+
                             return GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
@@ -1217,17 +1283,26 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     },
                                     child: CircleAvatar(
                                       radius: 28,
-                                      backgroundColor: AppColors.contrast
-                                          .withOpacity(0.2),
-                                      backgroundImage:
-                                          widget.profileImage.isNotEmpty
-                                              ? NetworkImage(
-                                                widget.profileImage,
-                                              )
-                                              : const AssetImage(
-                                                    "assets/icons/profile.png",
-                                                  )
-                                                  as ImageProvider,
+                                      backgroundColor: AppColors.borderGrey,
+                                      backgroundImage: isNetworkImage(widget.profileImage)
+                                          ? NetworkImage(widget.profileImage)
+                                          : null,
+                                      child: !isNetworkImage(widget.profileImage)
+                                          ? Container(
+                                              decoration: BoxDecoration(
+                                                color: AppColors.borderGrey, 
+                                                borderRadius: BorderRadius.circular(100)
+                                              ),
+                                              child: Text(
+                                                widget.name.isNotEmpty ? widget.name[0].toUpperCase() : "",
+                                                style: TextStyle(
+                                                  color: AppColors.text,
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.w500
+                                                )
+                                              ),
+                                            )
+                                          : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -1236,7 +1311,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        widget.name,
+                                        truncateWords(widget.name, 18),
                                         style: const TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w500,
@@ -1244,9 +1319,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                                         ),
                                       ),
                                       Text(
-                                        widget.userName != ""
-                                            ? "@${widget.userName}"
-                                            : "",
+                                        widget.userName.length > 24 
+                                          ? '${widget.userName.substring(0, 24)}...' 
+                                          : widget.userName,
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,

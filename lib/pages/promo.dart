@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cornaro/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PromoPage extends StatelessWidget {
   const PromoPage({super.key});
@@ -10,23 +11,29 @@ class PromoPage extends StatelessWidget {
       "name": "Enri's Pizza",
       "code": "PROMO10",
       "discount": "10% OFF",
-      "image": "assets/icons/enris.jpeg"
+      "image": "assets/icons/enris.jpeg",
     },
     {
       "name": "McDonald's",
       "code": "SAVE20",
       "discount": "20% OFF",
-      "image": "assets/icons/mc.png"
+      "image": "assets/icons/mc.png",
     },
     {
       "name": "KFC",
       "code": "DISCOUNT5",
       "discount": "5% OFF",
-      "image": "assets/icons/kfc.png"
+      "image": "assets/icons/kfc.png",
     },
   ];
 
-  void _showPromoCode(BuildContext context, String name, String code, String discount, String image) {
+  void _showPromoCode(
+    BuildContext context,
+    String name,
+    String code,
+    String discount,
+    String image,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -54,11 +61,7 @@ class PromoPage extends StatelessWidget {
                   ),
                 ),
                 ClipRRect(
-                  child: Image.asset(
-                    image,
-                    width: 80,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset(image, width: 80, fit: BoxFit.cover),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -87,7 +90,8 @@ class PromoPage extends StatelessWidget {
                         double totalWidth = constraints.maxWidth;
                         double dashWidth = 10;
                         double dashSpace = 3;
-                        int dashCount = (totalWidth / (dashWidth + dashSpace)).floor();
+                        int dashCount =
+                            (totalWidth / (dashWidth + dashSpace)).floor();
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: List.generate(dashCount, (_) {
@@ -103,22 +107,36 @@ class PromoPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                Text(
+                /* Text(
                   code,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w500,
                     color: Color(0xff0a45ac),
                   ),
+                ), */
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18)
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/icons/AW9lH7.svg',
+                    height: 160,
+                    width: 160,
+                  ),
                 ),
-                               Text(
+                SizedBox(height: 46)
+                /* SizedBox(height: 16),
+                Text(
                   "COUPON CODE",
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.text.withOpacity(0.8),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 40), */
               ],
             ),
           ),
@@ -152,13 +170,14 @@ class PromoPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final sponsor = sponsors[index];
                         return GestureDetector(
-                          onTap: () => _showPromoCode(
-                            context,
-                            sponsor["name"]!,
-                            sponsor["code"]!,
-                            sponsor["discount"]!,
-                            sponsor["image"]!,
-                          ),
+                          onTap:
+                              () => _showPromoCode(
+                                context,
+                                sponsor["name"]!,
+                                sponsor["code"]!,
+                                sponsor["discount"]!,
+                                sponsor["image"]!,
+                              ),
                           child: Stack(
                             children: [
                               Container(
@@ -192,13 +211,20 @@ class PromoPage extends StatelessWidget {
                                       height: 85,
                                       child: LayoutBuilder(
                                         builder: (context, constraints) {
-                                          double totalHeight = constraints.maxHeight;
+                                          double totalHeight =
+                                              constraints.maxHeight;
                                           double dashHeight = 10;
                                           double dashSpace = 3;
-                                          int dashCount = (totalHeight / (dashHeight + dashSpace)).floor();
+                                          int dashCount =
+                                              (totalHeight /
+                                                      (dashHeight + dashSpace))
+                                                  .floor();
                                           return Column(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: List.generate(dashCount, (_) {
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: List.generate(dashCount, (
+                                              _,
+                                            ) {
                                               return Container(
                                                 width: 2,
                                                 height: dashHeight,
@@ -212,8 +238,10 @@ class PromoPage extends StatelessWidget {
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             sponsor["discount"]!,

@@ -1,3 +1,4 @@
+import 'package:cornaro/pages/inbox.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cornaro/theme.dart';
@@ -2606,7 +2607,6 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                     Navigator.of(context).pop();
                   },
                 ),
-                SizedBox(width: 8),
               ],
             ),
             body: Stack(
@@ -2618,10 +2618,13 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                     return InteractiveViewer(
                       scaleEnabled: false,
                       panEnabled: true,
-                      child: Center(
-                        child: Image.network(
-                          images[index],
-                          fit: BoxFit.contain,
+                      child: Transform.translate(
+                        offset: const Offset(0, -40),
+                        child: Center(
+                          child: Image.network(
+                            images[index],
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     );
@@ -2637,8 +2640,8 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                         controller: pageController,
                         count: images.length,
                         effect: ExpandingDotsEffect(
-                          dotColor: Colors.white38,
-                          activeDotColor: Colors.white,
+                          dotColor: AppColors.text.withOpacity(0.5),
+                          activeDotColor: AppColors.text,
                           dotHeight: 8,
                           dotWidth: 8,
                           expansionFactor: 3,
@@ -2698,30 +2701,20 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
           PopupMenuButton<String>(
             onSelected: (value) {},
             color: AppColors.contrast,
-            itemBuilder:
+            itemBuilder: //TODO entrambi
                 (context) => [
                   PopupMenuItem(
                     value: 'segnala',
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Center(
-                        child: Text(
-                          'Segnala',
-                          style: TextStyle(color: AppColors.red),
-                        ),
-                      ),
+                    child: Text(
+                      'Segnala',
+                      style: TextStyle(color: AppColors.red),
                     ),
                   ),
                   PopupMenuItem(
                     value: 'condividi',
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Center(
-                        child: Text(
-                          'Condividi',
-                          style: TextStyle(color: AppColors.text),
-                        ),
-                      ),
+                    child: Text(
+                      'Condividi',
+                      style: TextStyle(color: AppColors.text),
                     ),
                   ),
                 ],
@@ -3052,18 +3045,25 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                                           seller!['profileImage'] != ""
                                       ? Image.network(
                                         seller!['profileImage'],
-                                        width: 56,
-                                        height: 56,
+                                        width: 40,
+                                        height: 40,
                                         fit: BoxFit.cover,
-                                      )
-                                      : Container(
-                                        width: 56,
-                                        height: 56,
+                                      ) : 
+                                      Container(
+                                        width: 40,
+                                        height: 40,
                                         color: AppColors.borderGrey,
-                                        child: Icon(
-                                          Icons.person,
-                                          size: 30,
-                                          color: AppColors.text,
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          seller != null
+                                              ? "${seller!['firstName'][0].toUpperCase()}"
+                                              : "",
+                                          style: TextStyle(
+                                            color: AppColors.text,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ),
                             ),
@@ -3158,13 +3158,12 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                                         ),
                                       ],
                                     ),
-                                SizedBox(height: 6),
                                 SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   physics: ClampingScrollPhysics(),
                                   child: Row(
                                     children: [
-                                      if (!isLoading &&
+                                      /* if (!isLoading &&
                                           seller!['isReliable'] == true)
                                         Padding(
                                           padding: const EdgeInsets.only(
@@ -3238,7 +3237,34 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                                             ],
                                           ),
                                         ),
-                                      ),
+                                      ), */
+
+                                      if (seller == null)
+                                        Text(
+                                          "Caricamento stato...",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.text.withOpacity(0.65),
+                                            fontWeight: FontWeight.w400,
+                                            height: 1
+                                          ),
+                                        )
+                                      else
+                                        Text(
+                                          seller!["isOnline"] == true
+                                              ? "Online ora"
+                                              : seller!["lastSeenAt"] != null
+                                                  ? "Ultimo accesso ${timeAgo(seller!["lastSeenAt"])}"
+                                                  : "Ultimo accesso non disponibile",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: seller!["isOnline"] == true
+                                                ? const Color.fromARGB(255, 24, 139, 28)
+                                                : AppColors.text.withOpacity(0.65),
+                                            fontWeight: FontWeight.w400,
+                                            height: 1
+                                          ),
+                                        )
                                     ],
                                   ),
                                 ),
@@ -3662,11 +3688,56 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                         ),
                       ),
                     ), */
+                    //TODO if isMe toglilo
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            try {
+                              final token = await storage.read(key: 'session_token');
+                              if (token == null) return;
+
+                              final sellerResponse = await http.get(
+                                Uri.parse('https://cornaro-backend.onrender.com/profile/${item['createdBy']}'),
+                                headers: {
+                                  'Authorization': 'Bearer $token',
+                                  'Content-Type': 'application/json',
+                                },
+                              );
+
+                              Map<String, dynamic> seller;
+                              if (sellerResponse.statusCode == 200) {
+                                seller = jsonDecode(sellerResponse.body);
+                              } else {
+                                seller = {
+                                  'firstName': item['createdBy'].split(".")[0],
+                                  'lastName': "",
+                                  'profileImage': "",
+                                };
+                              }
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatPage(
+                                    chatId: "",
+                                    username: "${seller['firstName']} ${seller['lastName']}",
+                                    avatar: seller['profileImage'],
+                                    book: {
+                                      '_id': item['_id'],
+                                      'sellerEmail': item['createdBy'],
+                                      'title': item['title'] ?? "",
+                                      'price': item['price'] ?? 0,
+                                      'image': item['image'] ?? "",
+                                    },
+                                  ),
+                                ),
+                              );
+                            } catch (e) {
+                              debugPrint('Errore apertura chat: $e');
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             backgroundColor: AppColors.primary,
@@ -3676,7 +3747,7 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                           ),
                           child: const Center(
                             child: Text(
-                              "Acquista",
+                              "Inizia la conversazione",
                               style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.white,
@@ -3685,7 +3756,7 @@ class _DettaglioItemPageState extends State<DettaglioItemPage> {
                           ),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -3820,7 +3891,7 @@ class DettaglioRipetizionePage extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 3),
                                 Text(
-                                  rep['valutazione']?.toStringAsFixed(1) ??
+                                  rep['valutazione']!?.toStringAsFixed(1) ??
                                       '0.0',
                                   style: const TextStyle(
                                     color: Color(0xFFe6a823),

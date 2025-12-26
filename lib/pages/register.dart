@@ -169,7 +169,7 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => loading = true);
 
     final url = Uri.parse(
-      "https://cornaro-backend.vercel.app/register/request",
+      "https://cornaro-backend.onrender.com/register/request",
     );
     final response = await http.post(
       url,
@@ -210,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
         if (_selectedImageLink != null) "profileImage": _selectedImageLink,
       };
 
-      final url = Uri.parse("https://cornaro-backend.vercel.app/register/verify");
+      final url = Uri.parse("https://cornaro-backend.onrender.com/register/verify");
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
