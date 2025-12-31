@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
 
   String userName = "";
   String name = "";
-  String profileImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTnN-t0-tHAAj1QfQUYM5mdb48JAALfcECFQ&s";
+  String profileImage = "";
 
   late final List<Widget> _pages;
 
@@ -1317,8 +1317,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             color: AppColors.primary,
             shape: ContinuousRectangleBorder(
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(70),
-                bottomRight: Radius.circular(70),
+                bottomLeft: Radius.circular(42),
+                bottomRight: Radius.circular(42),
               ),
             ),
             child: SizedBox(

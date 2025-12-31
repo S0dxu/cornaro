@@ -43,6 +43,8 @@ dependencies:
   dotted_border: ^3.1.0
   shimmer: ^3.0.0
   flutter_image_compress: ^2.4.0
+  firebase_core: ^4.3.0
+  firebase_messaging: ^16.1.0
 
 dev_dependencies:
   flutter_test:

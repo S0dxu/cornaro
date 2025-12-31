@@ -3,18 +3,27 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cornaro/pages/home.dart';
 import 'package:cornaro/pages/login.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cornaro/api/firebase_api.dart';
+import 'package:cornaro/firebase_options.dart';
 import 'package:cornaro/theme.dart';
 
 final storage = FlutterSecureStorage();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final token = await storage.read(key: 'session_token');
+
+  if (token != null && token.isNotEmpty) {
+    await FirebaseApi().initNotifications(token);
+  }
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
-  final token = await storage.read(key: 'session_token');
   final Widget initialPage =
       (token != null && token.isNotEmpty) ? const HomePage() : const LoginPage();
 
