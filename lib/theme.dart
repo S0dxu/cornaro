@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+final storage = FlutterSecureStorage();
 
 String currentTheme = "light";
 
@@ -17,19 +20,20 @@ class AppColors {
           : const Color(0xFFdadada);
 
   static Color get text =>
-      currentTheme == "dark"
-          ? const Color(0xffc4c5ca)
-          : Colors.black;
+      currentTheme == "dark" ? const Color(0xffc4c5ca) : Colors.black;
 
   static Color get contrast =>
-      currentTheme == "dark"
-          ? Color(0xFF121214)
-          : Colors.white;
+      currentTheme == "dark" ? Color(0xFF121214) : Colors.white;
 
   static Color get red =>
       currentTheme == "dark"
           ? const Color(0xFFFF6F6A)
           : const Color(0xFFE53935);
+
+  static Color get green =>
+      currentTheme == "dark"
+          ? const Color(0xFF56c989)
+          : const Color(0xFF50cc89);
 }
 
 late void Function() refreshApp;

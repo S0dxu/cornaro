@@ -13,9 +13,62 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:shimmer/shimmer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:cornaro/state/message_notifier.dart';
 
 ValueNotifier<String> themeNotifier = ValueNotifier(currentTheme);
 final storage = FlutterSecureStorage();
+
+Future<bool> hasUnreadMessages(String token) async {
+  final response = await http.get(
+    Uri.parse('https://cornaro-backend.onrender.com/chats'),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+  );
+
+  if (response.statusCode != 200) {
+    return false;
+  }
+
+  final List chats = jsonDecode(response.body);
+
+  for (final chat in chats) {
+    final lastMessage = chat['lastMessage'];
+
+    if (lastMessage == null) continue;
+
+    final bool seen = lastMessage['seen'] ?? true;
+    final bool isMe = lastMessage['sender'] == chat['me'];
+
+    if (!seen && !isMe) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+Future<void> _checkUnreadMessages() async {
+  final token = await storage.read(key: 'session_token');
+  if (token == null) return;
+
+  final hasUnread = await hasUnreadMessages(token);
+  hasNewMessagesNotifier.value = hasUnread;
+}
+
+String _resolveIconPath(String basePath, bool selected) {
+  if (!selected) return basePath;
+
+  final dotIndex = basePath.lastIndexOf('.');
+  if (dotIndex == -1) return basePath;
+
+  return basePath.replaceRange(
+    dotIndex,
+    dotIndex,
+    '_full',
+  );
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +83,7 @@ class _HomePageState extends State<HomePage> {
 
   String userName = "";
   String name = "";
-  String profileImage = "assets/icons/profile.png";
+  String profileImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTnN-t0-tHAAj1QfQUYM5mdb48JAALfcECFQ&s";
 
   late final List<Widget> _pages;
 
@@ -47,11 +100,13 @@ class _HomePageState extends State<HomePage> {
       ),
       const AddPage(),
       InboxPage(),
-      const ShopPage(),
+      /* const ShopPage(), */
+      LibriUsatiPage(),
       const PromoPage(),
     ];
 
     _loadUserData();
+    _checkUnreadMessages();
   }
 
   Future<void> _loadUserData() async {
@@ -92,23 +147,32 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: ValueListenableBuilder<String>(
-        valueListenable: themeNotifier,
-        builder: (context, theme, child) {
-          final borderColor = AppColors.borderGrey;
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() => _selectedIndex = 0);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: ValueListenableBuilder<String>(
+          valueListenable: themeNotifier,
+          builder: (context, theme, child) {
+            final borderColor = AppColors.borderGrey;
 
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: borderColor, width: 0.5)),
-            ),
-            child: _BottomBar(
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
-            ),
-          );
-        },
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: borderColor, width: 0.5)),
+              ),
+              child: _BottomBar(
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -178,42 +242,90 @@ class _BottomBar extends StatelessWidget {
               children: [
                 SizedBox(height: 8),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _item(
-                      index: 0,
-                      iconPath: "assets/icons/home.svg",
-                      label: "Home",
-                      primaryColor: primaryColor,
-                      textColor: textColor,
+                    Expanded(
+                      child: _item(
+                        index: 0,
+                        iconPath: "assets/icons/home.svg",
+                        label: "Home",
+                        primaryColor: primaryColor,
+                        textColor: textColor,
+                      ),
                     ),
-                    _item(
-                      index: 1,
-                      iconPath:
-                          "assets/icons/clothes-hanger-svgrepo-com.svg",
-                      label: "Merch",
-                      primaryColor: primaryColor,
-                      textColor: textColor,
+                    Expanded(
+                      child: _item(
+                        index: 1,
+                        iconPath: "assets/icons/hanger.svg",
+                        label: "Merch",
+                        primaryColor: primaryColor,
+                        textColor: textColor,
+                      ),
                     ),
-                    _item(
-                      index: 2,
-                      iconPath: "assets/icons/mail-svgrepo-com (2).svg",
-                      label: "Inbox",
-                      primaryColor: primaryColor,
-                      textColor: textColor,
+                    Expanded(
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: hasNewMessagesNotifier,
+                        builder: (context, hasNewMessages, child) {
+                          return GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onTap(2),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              alignment: Alignment.center,
+                              children: [
+                                _item(
+                                  index: 2,
+                                  iconPath: "assets/icons/mail.svg",
+                                  label: "Inbox",
+                                  primaryColor: primaryColor,
+                                  textColor: textColor,
+                                ),
+                                if (hasNewMessages)
+                                  Positioned(
+                                    top: -1,
+                                    right: 20,
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.bgGrey,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    _item(
-                      index: 3,
-                      iconPath: "assets/icons/book-svgrepo-com (1).svg",
-                      label: "Shop",
-                      primaryColor: primaryColor,
-                      textColor: textColor,
+                    Expanded(
+                      child: _item(
+                        index: 3,
+                        iconPath: "assets/icons/book-svgrepo-com (3).svg",
+                        label: "Shop",
+                        primaryColor: primaryColor,
+                        textColor: textColor,
+                      ),
                     ),
-                    _item(
-                      index: 4,
-                      iconPath: "assets/icons/present.svg",
-                      label: "Promo",
-                      primaryColor: primaryColor,
-                      textColor: textColor,
+                    Expanded(
+                      child: _item(
+                        index: 4,
+                        iconPath: "assets/icons/present.svg",
+                        label: "Promo",
+                        primaryColor: primaryColor,
+                        textColor: textColor,
+                      ),
                     ),
                   ],
                 ),
@@ -235,33 +347,34 @@ class _BottomBar extends StatelessWidget {
   }) {
     final selected = currentIndex == index;
 
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onTap(index),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              height: isAdd ? 38 : 24,
-              width: isAdd ? 38 : 24,
-              color: selected ? primaryColor : textColor.withOpacity(0.75),
-            ),
-            if (!isAdd)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color:
-                        selected ? primaryColor : textColor.withOpacity(0.75),
-                  ),
+    final resolvedIconPath = _resolveIconPath(iconPath, selected);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onTap(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            resolvedIconPath,
+            height: isAdd ? 38 : 24,
+            width: isAdd ? 38 : 24,
+            color: selected ? primaryColor : textColor.withOpacity(0.75),
+          ),
+          if (!isAdd)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: selected
+                      ? primaryColor
+                      : textColor.withOpacity(0.75),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -299,9 +412,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool isLoading = true;
 
   final List<String> contactImages = [
-    "assets/icons/istockphoto-1279827640-612x612.jpg",
-    "assets/icons/un-episodio-di-contro-bullismo-la-vittima-diventa-carnefice-main__748x0_q85_crop_subsampling-2.jpg",
-    "assets/icons/istockphoto-1436392629-612x612.jpg",
+    "assets/icons/image-removebg-preview (24).png",
+    "assets/icons/un-episodio-di-contro-bullismo-la-vittima-diventa-carnefice-main__748x0_q85_crop_subsampling-2-removebg-preview.png",
+    "assets/icons/istockphoto-1436392629-612x612-removebg-preview.png",
   ];
 
   final List<String> contactTexts = [
@@ -440,6 +553,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     _loadMaxMessages();
     _loadMessages();
+    _checkUnreadMessages();
     searchController.addListener(_filterMessages);
   }
 
@@ -833,6 +947,30 @@ class _HomeWidgetState extends State<HomeWidget> {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                               ),
+                              /* child: Material(
+                                color: AppColors.contrast,
+                                shape: ContinuousRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                child: Row(
+                                  children: [
+                                    AspectRatio(
+                                      aspectRatio: 1,
+                                      child: ClipPath(
+                                        clipper: ShapeBorderClipper(
+                                          shape: ContinuousRectangleBorder(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(40),
+                                              bottomLeft: Radius.circular(40),
+                                            ),
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          contactImages[index],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ), */
                               child: Container(
                                 margin: const EdgeInsets.all(3),
                                 decoration: BoxDecoration(
@@ -852,13 +990,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                                       aspectRatio: 1,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
                                           borderRadius: const BorderRadius.only(
                                             topLeft: Radius.circular(16),
                                             bottomLeft: Radius.circular(16),
                                           ),
                                         ),
-                                        padding: const EdgeInsets.all(10),
+                                        padding: const EdgeInsets.only(top: 12, left: 12, bottom: 12),
                                         child: Image.asset(
                                           contactImages[index],
                                           fit: BoxFit.cover,
@@ -1007,6 +1144,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                   top: Radius.circular(20),
                                                 ),
                                           ),
+                                          /* Material( // al posto di return Container...
+                                          color: AppColors.bgGrey,
+                                          shape: ContinuousRectangleBorder(
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(40),
+                                              topRight: Radius.circular(40),
+                                            ),
+                                          ), */
                                           child: SingleChildScrollView(
                                             controller: scrollController,
                                             child: Padding(
@@ -1181,7 +1326,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               width: double.infinity,
               child: Stack(
                 children: [
-                  Positioned.fill(
+                  /* Positioned.fill(
                     child: OverflowBox(
                       maxWidth: double.infinity,
                       maxHeight: 95,
@@ -1209,7 +1354,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                       ),
                     ),
-                  ),
+                  ), */
                   Column(
                     children: [
                       const SizedBox(height: 16),
@@ -1254,23 +1399,24 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                       height: size,
                                                       color: AppColors.bgGrey,
                                                       child: InteractiveViewer(
-                                                        child:
-                                                            widget
-                                                                    .profileImage
-                                                                    .isNotEmpty
-                                                                ? Image.network(
-                                                                  widget
-                                                                      .profileImage,
-                                                                  fit:
-                                                                      BoxFit
-                                                                          .cover,
-                                                                )
-                                                                : Image.asset(
-                                                                  "assets/icons/profile.png",
-                                                                  fit:
-                                                                      BoxFit
-                                                                          .cover,
-                                                                ),
+                                                        child: widget.profileImage.isNotEmpty && widget.profileImage != null
+                                                        ? Image.network(
+                                                          widget.profileImage,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                        : 
+                                                        CircleAvatar(
+                                                          radius: size / 2,
+                                                          backgroundColor: AppColors.borderGrey,
+                                                          child: Text(
+                                                            widget.name[0].toUpperCase(),
+                                                            style: TextStyle(
+                                                              color: AppColors.text,
+                                                              fontWeight: FontWeight.w400,
+                                                              fontSize: size / 2,
+                                                            ),
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -1284,25 +1430,35 @@ class _HomeWidgetState extends State<HomeWidget> {
                                     child: CircleAvatar(
                                       radius: 28,
                                       backgroundColor: AppColors.borderGrey,
-                                      backgroundImage: isNetworkImage(widget.profileImage)
-                                          ? NetworkImage(widget.profileImage)
-                                          : null,
-                                      child: !isNetworkImage(widget.profileImage)
-                                          ? Container(
-                                              decoration: BoxDecoration(
-                                                color: AppColors.borderGrey, 
-                                                borderRadius: BorderRadius.circular(100)
-                                              ),
-                                              child: Text(
-                                                widget.name.isNotEmpty ? widget.name[0].toUpperCase() : "",
-                                                style: TextStyle(
-                                                  color: AppColors.text,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.w500
-                                                )
-                                              ),
-                                            )
-                                          : null,
+                                      backgroundImage:
+                                          isNetworkImage(widget.profileImage)
+                                              ? NetworkImage(
+                                                widget.profileImage,
+                                              )
+                                              : null,
+                                      child:
+                                          !isNetworkImage(widget.profileImage)
+                                              ? Container(
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.borderGrey,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        100,
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  widget.name.isNotEmpty
+                                                      ? widget.name[0]
+                                                          .toUpperCase()
+                                                      : "",
+                                                  style: TextStyle(
+                                                    color: AppColors.text,
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              )
+                                              : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -1319,9 +1475,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                                         ),
                                       ),
                                       Text(
-                                        widget.userName.length > 24 
-                                          ? '${widget.userName.substring(0, 24)}...' 
-                                          : widget.userName,
+                                        widget.userName.length > 24
+                                            ? '${widget.userName.substring(0, 24)}...'
+                                            : widget.userName,
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
@@ -1576,44 +1732,22 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                   body: Column(
                                     children: [
-                                      ListTile(
+                                      SwitchListTile(
                                         title: Text(
-                                          "Light Mode",
+                                          "Tema Scuro",
                                           style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             fontSize: 16,
                                             color: AppColors.text,
                                           ),
                                         ),
-                                        trailing: Icon(
-                                          selectedTheme == "light"
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_unchecked,
-                                          color: AppColors.primary,
-                                        ),
-                                        onTap: () {
-                                          selectedTheme = "light";
-                                          _toggleTheme("light");
-                                        },
-                                      ),
-                                      ListTile(
-                                        title: Text(
-                                          "Dark Mode",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 16,
-                                            color: AppColors.text,
-                                          ),
-                                        ),
-                                        trailing: Icon(
-                                          selectedTheme == "dark"
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_unchecked,
-                                          color: AppColors.primary,
-                                        ),
-                                        onTap: () {
-                                          selectedTheme = "dark";
-                                          _toggleTheme("dark");
+                                        value: selectedTheme == "dark",
+                                        activeColor: AppColors.primary,
+                                        onChanged: (bool value) {
+                                          setState(() {
+                                            selectedTheme = value ? "dark" : "light";
+                                            _toggleTheme(selectedTheme);
+                                          });
                                         },
                                       ),
                                     ],

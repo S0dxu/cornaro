@@ -1330,6 +1330,7 @@ class ShopPage extends StatelessWidget {
     final List<String> categories = [
       /* 'Appunti',  */ 'Libri Usati',
       'Ripetizioni',
+      'Merch del Cornaro',
     ];
 
     return Scaffold(
@@ -1662,439 +1663,921 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
       'Storia',
       'Filosofia',
     ];
-    final classi = ['Tutte', '1ª', '2ª', '3ª', '4ª', '5ª'];
+    final classi = ['Tutte', '1', '2', '3', '4', '5'];
+
+    /* appBar: AppBar(
+        /* leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.text),
+          onPressed: () => Navigator.pop(context),
+        ), */
+        backgroundColor: AppColors.bgGrey,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        toolbarHeight: 115,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 42,
+                      decoration: BoxDecoration(color: AppColors.bgGrey),
+                      child: TextField(
+                        onChanged: (value) {
+                          searchText = value;
+                          _fetchLibri(reset: true);
+                        },
+                        style: TextStyle(color: AppColors.text.withOpacity(0.8)),
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          hintText: 'Cerca libri',
+                          hintStyle: TextStyle(
+                            color: AppColors.text.withOpacity(0.65),
+                            fontSize: 16,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: SvgPicture.asset(
+                              'assets/icons/search.svg',
+                              color: AppColors.text.withOpacity(0.65),
+                              width: 18,
+                              height: 18,
+                            ),
+                          ),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: AppColors.bgGrey,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        builder:
+                            (context) => StatefulBuilder(
+                              builder:
+                                  (context, setModalState) => SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.6,
+                                    child: SingleChildScrollView(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(bottom: 20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 20),
+                                            Center(
+                                              child: Container(
+                                                width: 40,
+                                                height: 5,
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 16,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.text.withOpacity(
+                                                    0.15,
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(
+                                                    10,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const Center(
+                                              child: Text(
+                                                "Filtra per",
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 20),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Text(
+                                                "Condizione",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Row(
+                                                children:
+                                                    condizioni.map((condizione) {
+                                                      final isSelected =
+                                                          selectedCondizione ==
+                                                          condizione;
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          setModalState(
+                                                            () =>
+                                                                selectedCondizione =
+                                                                    condizione,
+                                                          );
+                                                          _fetchLibri(reset: true);
+                                                        },
+                                                        child: Container(
+                                                          margin:
+                                                              const EdgeInsets.only(
+                                                                right: 6,
+                                                              ),
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 16,
+                                                                vertical: 8,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  100,
+                                                                ),
+                                                            border: Border.all(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors.text
+                                                                          .withOpacity(
+                                                                            0.25,
+                                                                          ),
+                                                              width: 2,
+                                                            ),
+                                                            color:
+                                                                isSelected
+                                                                    ? AppColors
+                                                                        .primary
+                                                                        .withOpacity(
+                                                                          0.1,
+                                                                        )
+                                                                    : Colors
+                                                                        .transparent,
+                                                          ),
+                                                          child: Text(
+                                                            condizione,
+                                                            style: TextStyle(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors
+                                                                          .text,
+                                                              fontWeight:
+                                                                  FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 15),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Text(
+                                                "Materia",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Row(
+                                                children:
+                                                    materie.map((materia) {
+                                                      final isSelected =
+                                                          selectedMateria == materia;
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          setModalState(
+                                                            () =>
+                                                                selectedMateria =
+                                                                    materia,
+                                                          );
+                                                          _fetchLibri(reset: true);
+                                                        },
+                                                        child: Container(
+                                                          margin:
+                                                              const EdgeInsets.only(
+                                                                right: 6,
+                                                              ),
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 16,
+                                                                vertical: 8,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  100,
+                                                                ),
+                                                            border: Border.all(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors.text
+                                                                          .withOpacity(
+                                                                            0.25,
+                                                                          ),
+                                                              width: 2,
+                                                            ),
+                                                            color:
+                                                                isSelected
+                                                                    ? AppColors
+                                                                        .primary
+                                                                        .withOpacity(
+                                                                          0.1,
+                                                                        )
+                                                                    : Colors
+                                                                        .transparent,
+                                                          ),
+                                                          child: Text(
+                                                            materia,
+                                                            style: TextStyle(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors
+                                                                          .text,
+                                                              fontWeight:
+                                                                  FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 15),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Text(
+                                                "Anno",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Row(
+                                                children:
+                                                    classi.map((classe) {
+                                                      final isSelected =
+                                                          selectedClasse == classe;
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          setModalState(
+                                                            () =>
+                                                                selectedClasse =
+                                                                    classe,
+                                                          );
+                                                          _fetchLibri(reset: true);
+                                                        },
+                                                        child: Container(
+                                                          margin:
+                                                              const EdgeInsets.only(
+                                                                right: 6,
+                                                              ),
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 16,
+                                                                vertical: 8,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  100,
+                                                                ),
+                                                            border: Border.all(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors.text
+                                                                          .withOpacity(
+                                                                            0.25,
+                                                                          ),
+                                                              width: 2,
+                                                            ),
+                                                            color:
+                                                                isSelected
+                                                                    ? AppColors
+                                                                        .primary
+                                                                        .withOpacity(
+                                                                          0.1,
+                                                                        )
+                                                                    : Colors
+                                                                        .transparent,
+                                                          ),
+                                                          child: Text(
+                                                            classe == 'Tutte' ? 'Tutti' : '$classeº',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  isSelected
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors
+                                                                          .text,
+                                                              fontWeight:
+                                                                  FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 25),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: Text(
+                                                "Prezzo (€)",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                              ),
+                                              child: RangeSlider(
+                                                values: selectedPrezzoRange,
+                                                min: 0,
+                                                max: 50,
+                                                divisions: 50,
+                                                activeColor: AppColors.primary,
+                                                labels: RangeLabels(
+                                                  "${selectedPrezzoRange.start.toStringAsFixed(0)} €",
+                                                  "${selectedPrezzoRange.end.toStringAsFixed(0)} €",
+                                                ),
+                                                onChanged: (range) {
+                                                  setModalState(
+                                                    () => selectedPrezzoRange = range,
+                                                  );
+                                                  _fetchLibri(reset: true);
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                            ),
+                      );
+                    },
+                    child: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.bgGrey,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppColors.borderGrey.withOpacity(0.8),
+                          width: 1,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SvgPicture.asset(
+                          'assets/icons/filter.svg',
+                          color: AppColors.text.withOpacity(0.65),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Row(
+                  children: materie.map((condizione) {
+                    final isSelected = selectedCondizione == condizione;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => selectedCondizione = condizione);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.text.withOpacity(0.25),
+                            width: 1,
+                          ),
+                          color: isSelected
+                              ? AppColors.primary.withOpacity(0.1)
+                              : Colors.transparent,
+                        ),
+                        child: Text(
+                          condizione,
+                          style: TextStyle(
+                            color: isSelected ? AppColors.primary : AppColors.text,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ), */
 
     return Scaffold(
       backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
-        leading: IconButton(
+        /* leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.text),
           onPressed: () => Navigator.pop(context),
-        ),
+        ), */
         backgroundColor: AppColors.bgGrey,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 42,
-                decoration: BoxDecoration(color: AppColors.bgGrey),
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() => searchText = value);
-                  },
-                  style: TextStyle(color: AppColors.text.withOpacity(0.8)),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    hintText: 'Cerca libri',
-                    hintStyle: TextStyle(
-                      color: AppColors.text.withOpacity(0.65),
-                      fontSize: 16,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 9,
-                    ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SvgPicture.asset(
-                        'assets/icons/search.svg',
+        toolbarHeight: 70,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 42,
+                  decoration: BoxDecoration(color: AppColors.bgGrey),
+                  child: TextField(
+                    onChanged: (value) {
+                      searchText = value;
+                      _fetchLibri(reset: true);
+                    },
+                    style: TextStyle(color: AppColors.text.withOpacity(0.8)),
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      hintText: 'Cerca libri',
+                      hintStyle: TextStyle(
                         color: AppColors.text.withOpacity(0.65),
-                        width: 18,
-                        height: 18,
+                        fontSize: 16,
                       ),
-                    ),
-                    prefixIconConstraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 9,
+                      ),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: SvgPicture.asset(
+                          'assets/icons/search.svg',
+                          color: AppColors.text.withOpacity(0.65),
+                          width: 18,
+                          height: 18,
+                        ),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppColors.bgGrey,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: AppColors.bgGrey,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
-                  ),
-                  builder:
-                      (context) => StatefulBuilder(
-                        builder:
-                            (context, setModalState) => SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.6,
-                              child: SingleChildScrollView(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 20),
-                                      Center(
-                                        child: Container(
-                                          width: 40,
-                                          height: 5,
-                                          margin: const EdgeInsets.only(
-                                            bottom: 16,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.text.withOpacity(
-                                              0.15,
+                    builder:
+                        (context) => StatefulBuilder(
+                          builder:
+                              (context, setModalState) => SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.6,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 20),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 20),
+                                        Center(
+                                          child: Container(
+                                            width: 40,
+                                            height: 5,
+                                            margin: const EdgeInsets.only(
+                                              bottom: 16,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              10,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.text.withOpacity(
+                                                0.15,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                10,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      const Center(
-                                        child: Text(
-                                          "Filtra per",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
+                                        const Center(
+                                          child: Text(
+                                            "Filtra per",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Text(
-                                          "Condizione",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
+                                        const SizedBox(height: 20),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Text(
+                                            "Condizione",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Row(
-                                          children:
-                                              condizioni.map((condizione) {
-                                                final isSelected =
-                                                    selectedCondizione ==
-                                                    condizione;
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setModalState(
-                                                      () =>
-                                                          selectedCondizione =
-                                                              condizione,
-                                                    );
-                                                    _fetchLibri(reset: true);
-                                                  },
-                                                  child: Container(
-                                                    margin:
-                                                        const EdgeInsets.only(
-                                                          right: 6,
-                                                        ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 16,
-                                                          vertical: 8,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            100,
+                                        const SizedBox(height: 10),
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Row(
+                                            children:
+                                                condizioni.map((condizione) {
+                                                  final isSelected =
+                                                      selectedCondizione ==
+                                                      condizione;
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      setModalState(
+                                                        () =>
+                                                            selectedCondizione =
+                                                                condizione,
+                                                      );
+                                                      _fetchLibri(reset: true);
+                                                    },
+                                                    child: Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            right: 6,
                                                           ),
-                                                      border: Border.all(
-                                                        color:
-                                                            isSelected
-                                                                ? AppColors
-                                                                    .primary
-                                                                : AppColors.text
-                                                                    .withOpacity(
-                                                                      0.25,
-                                                                    ),
-                                                        width: 2,
-                                                      ),
-                                                      color:
-                                                          isSelected
-                                                              ? AppColors
-                                                                  .primary
-                                                                  .withOpacity(
-                                                                    0.1,
-                                                                  )
-                                                              : Colors
-                                                                  .transparent,
-                                                    ),
-                                                    child: Text(
-                                                      condizione,
-                                                      style: TextStyle(
-                                                        color:
-                                                            isSelected
-                                                                ? AppColors
-                                                                    .primary
-                                                                : AppColors
-                                                                    .text,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 15),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Text(
-                                          "Materia",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Row(
-                                          children:
-                                              materie.map((materia) {
-                                                final isSelected =
-                                                    selectedMateria == materia;
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setModalState(
-                                                      () =>
-                                                          selectedMateria =
-                                                              materia,
-                                                    );
-                                                    _fetchLibri(reset: true);
-                                                  },
-                                                  child: Container(
-                                                    margin:
-                                                        const EdgeInsets.only(
-                                                          right: 6,
-                                                        ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 16,
-                                                          vertical: 8,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            100,
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 16,
+                                                            vertical: 8,
                                                           ),
-                                                      border: Border.all(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              100,
+                                                            ),
+                                                        border: Border.all(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors.text
+                                                                      .withOpacity(
+                                                                        0.25,
+                                                                      ),
+                                                          width: 2,
+                                                        ),
                                                         color:
                                                             isSelected
                                                                 ? AppColors
                                                                     .primary
-                                                                : AppColors.text
                                                                     .withOpacity(
-                                                                      0.25,
-                                                                    ),
-                                                        width: 2,
+                                                                      0.1,
+                                                                    )
+                                                                : Colors
+                                                                    .transparent,
                                                       ),
-                                                      color:
-                                                          isSelected
-                                                              ? AppColors
-                                                                  .primary
-                                                                  .withOpacity(
-                                                                    0.1,
-                                                                  )
-                                                              : Colors
-                                                                  .transparent,
-                                                    ),
-                                                    child: Text(
-                                                      materia,
-                                                      style: TextStyle(
-                                                        color:
-                                                            isSelected
-                                                                ? AppColors
-                                                                    .primary
-                                                                : AppColors
-                                                                    .text,
-                                                        fontWeight:
-                                                            FontWeight.w500,
+                                                      child: Text(
+                                                        condizione,
+                                                        style: TextStyle(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors
+                                                                      .text,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 15),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Text(
-                                          "Classe",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
+                                                  );
+                                                }).toList(),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
+                                        const SizedBox(height: 15),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Text(
+                                            "Materia",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
-                                        child: Row(
-                                          children:
-                                              classi.map((classe) {
-                                                final isSelected =
-                                                    selectedClasse == classe;
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setModalState(
-                                                      () =>
-                                                          selectedClasse =
-                                                              classe,
-                                                    );
-                                                    _fetchLibri(reset: true);
-                                                  },
-                                                  child: Container(
-                                                    margin:
-                                                        const EdgeInsets.only(
-                                                          right: 6,
-                                                        ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 16,
-                                                          vertical: 8,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            100,
+                                        const SizedBox(height: 10),
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Row(
+                                            children:
+                                                materie.map((materia) {
+                                                  final isSelected =
+                                                      selectedMateria == materia;
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      setModalState(
+                                                        () =>
+                                                            selectedMateria =
+                                                                materia,
+                                                      );
+                                                      _fetchLibri(reset: true);
+                                                    },
+                                                    child: Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            right: 6,
                                                           ),
-                                                      border: Border.all(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 16,
+                                                            vertical: 8,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              100,
+                                                            ),
+                                                        border: Border.all(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors.text
+                                                                      .withOpacity(
+                                                                        0.25,
+                                                                      ),
+                                                          width: 2,
+                                                        ),
                                                         color:
                                                             isSelected
                                                                 ? AppColors
                                                                     .primary
-                                                                : AppColors.text
                                                                     .withOpacity(
-                                                                      0.25,
-                                                                    ),
-                                                        width: 2,
+                                                                      0.1,
+                                                                    )
+                                                                : Colors
+                                                                    .transparent,
                                                       ),
-                                                      color:
-                                                          isSelected
-                                                              ? AppColors
-                                                                  .primary
-                                                                  .withOpacity(
-                                                                    0.1,
-                                                                  )
-                                                              : Colors
-                                                                  .transparent,
+                                                      child: Text(
+                                                        materia,
+                                                        style: TextStyle(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors
+                                                                      .text,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
                                                     ),
-                                                    child: Text(
-                                                      classe,
-                                                      style: TextStyle(
+                                                  );
+                                                }).toList(),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 15),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Text(
+                                            "Anno",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Row(
+                                            children:
+                                                classi.map((classe) {
+                                                  final isSelected =
+                                                      selectedClasse == classe;
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      setModalState(
+                                                        () =>
+                                                            selectedClasse =
+                                                                classe,
+                                                      );
+                                                      _fetchLibri(reset: true);
+                                                    },
+                                                    child: Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            right: 6,
+                                                          ),
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 16,
+                                                            vertical: 8,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              100,
+                                                            ),
+                                                        border: Border.all(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors.text
+                                                                      .withOpacity(
+                                                                        0.25,
+                                                                      ),
+                                                          width: 2,
+                                                        ),
                                                         color:
                                                             isSelected
                                                                 ? AppColors
                                                                     .primary
-                                                                : AppColors
-                                                                    .text,
-                                                        fontWeight:
-                                                            FontWeight.w500,
+                                                                    .withOpacity(
+                                                                      0.1,
+                                                                    )
+                                                                : Colors
+                                                                    .transparent,
+                                                      ),
+                                                      child: Text(
+                                                        classe == 'Tutte' ? 'Tutti' : '$classeº',
+                                                        style: TextStyle(
+                                                          color:
+                                                              isSelected
+                                                                  ? AppColors
+                                                                      .primary
+                                                                  : AppColors
+                                                                      .text,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 25),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Text(
-                                          "Prezzo (€)",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
+                                                  );
+                                                }).toList(),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: RangeSlider(
-                                          values: selectedPrezzoRange,
-                                          min: 0,
-                                          max: 50,
-                                          divisions: 50,
-                                          activeColor: AppColors.primary,
-                                          labels: RangeLabels(
-                                            "${selectedPrezzoRange.start.toStringAsFixed(0)} €",
-                                            "${selectedPrezzoRange.end.toStringAsFixed(0)} €",
+                                        const SizedBox(height: 25),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20,
                                           ),
-                                          onChanged: (range) {
-                                            setModalState(
-                                              () => selectedPrezzoRange = range,
-                                            );
-                                            _fetchLibri(reset: true);
-                                          },
+                                          child: Text(
+                                            "Prezzo (€)",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: RangeSlider(
+                                            values: selectedPrezzoRange,
+                                            min: 0,
+                                            max: 50,
+                                            divisions: 50,
+                                            activeColor: AppColors.primary,
+                                            labels: RangeLabels(
+                                              "${selectedPrezzoRange.start.toStringAsFixed(0)} €",
+                                              "${selectedPrezzoRange.end.toStringAsFixed(0)} €",
+                                            ),
+                                            onChanged: (range) {
+                                              setModalState(
+                                                () => selectedPrezzoRange = range,
+                                              );
+                                              _fetchLibri(reset: true);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                      ),
-                );
-              },
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.bgGrey,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: AppColors.borderGrey.withOpacity(0.8),
-                    width: 1,
+                        ),
+                  );
+                },
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.bgGrey,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: AppColors.borderGrey.withOpacity(0.8),
+                      width: 1,
+                    ),
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SvgPicture.asset(
-                    'assets/icons/filter.svg',
-                    color: AppColors.text.withOpacity(0.65),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SvgPicture.asset(
+                      'assets/icons/filter.svg',
+                      color: AppColors.text.withOpacity(0.65),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(left: 8, right: 8),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final double itemHeight = 430;
@@ -2305,7 +2788,9 @@ class _LibriUsatiPageState extends State<LibriUsatiPage> {
         },
         backgroundColor: AppColors.primary,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(32),
+        ),
         child: SvgPicture.asset(
           'assets/icons/plus.svg',
           color: Colors.white,
@@ -4393,7 +4878,8 @@ List<Uint8List> webImages = [];
                     final isLast = kIsWeb ? i == webImages.length : i == imageFiles.length;
 
                     if (isLast) {
-                      return GestureDetector( //TODO allargare questo in modo da essere più facile da tappare
+                      return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                         onTap: pickImagesOrCamera,
                         child: DottedBorder(
                           options: RoundedRectDottedBorderOptions(
