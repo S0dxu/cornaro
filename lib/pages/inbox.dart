@@ -229,7 +229,7 @@ class _InboxPageState extends State<InboxPage> with WidgetsBindingObserver {
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: AppColors.text.withOpacity(0.2)),
+            bottom: BorderSide(color: AppColors.text.withOpacity(0.2), width: 0.5),
           ),
         ),
         child: Column(
@@ -318,7 +318,6 @@ class _InboxPageState extends State<InboxPage> with WidgetsBindingObserver {
       chats = data;
       isLoading = false;
     });
-
   }
 
   String formatDate(String dateString) {
@@ -465,235 +464,251 @@ class _InboxPageState extends State<InboxPage> with WidgetsBindingObserver {
                 itemCount: chats.length,
                 separatorBuilder:
                     (_, __) =>
-                        Divider(color: AppColors.borderGrey, thickness: 1),
+                        Divider(color: AppColors.borderGrey, thickness: 0.5),
                 itemBuilder: (context, index) {
                   final chat = chats[index];
                   if (_selectedTab == 1 && chat['book'] != null) {
-            final book = chat['book'];
-            return ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: book['image'] != ""
-                    ? Image.network(
-                        book['image'],
-                        height: 56,
-                        width: 56,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        height: 56,
-                        width: 56,
-                        color: AppColors.borderGrey,
-                        child: Icon(Icons.book, color: AppColors.text),
-                      ),
-              ),
-              title: Text(
-                book['title'] ?? '',
-                style: TextStyle(
-                  color: AppColors.text,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                "${book['price'].toString()} €",
-                style: TextStyle(
-                  color: AppColors.text.withOpacity(0.75),
-                  fontSize: 16,
-                ),
-              ),
-              trailing: SvgPicture.asset(
-                "assets/icons/arrow-right.svg",
-                height: 18,
-                width: 18,
-                colorFilter: ColorFilter.mode(
-                  AppColors.text.withOpacity(0.5),
-                  BlendMode.srcIn,
-                ),
-              ),
-              onTap: () {
-                //TODO
-              },
-            );
-          }
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  top: 8,
-                  bottom: 8,
-                ),
-                child: Text(
-                  formatDate(chat['time']),
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: AppColors.text.withOpacity(0.85),
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: UserAvatar(
-                  avatar: chat['avatar'] is String
-                      ? chat['avatar']
-                      : chat['username'][0],
-                  fallbackText: chat['username'][0].toUpperCase(),
-                  radius: 22,
-                  showOnline: true,
-                  online: chat['online'] ?? false,
-                ),
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            chat['username'],
-                            style: TextStyle(
-                              color: AppColors.text,
-                              fontSize: 14,
-                              height: 1,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        if (!(chat['seen'] ?? true) &&
-                            !(chat['isMe'] ?? false))
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            height: 16,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: AppColors.primary,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "nuovi messaggi",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  height: 1,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      height: 18,
-                      child: Row(
-                        children: [
-                          if ((chat['seen'] ?? true) &&
-                              (chat['isMe'] ?? true))
-                            Row(
-                              children: [
-                                Center(
-                                  child: Transform.translate(
-                                    offset: const Offset(0, 1),
-                                    child: SvgPicture.asset(
-                                      "assets/icons/seen-svgrepo-com.svg",
-                                      height: 20,
-                                      width: 20,
-                                      colorFilter: ColorFilter.mode(
-                                        AppColors.primary,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
+                    final book = chat['book'];
+                    return ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child:
+                            book['image'] != ""
+                                ? Image.network(
+                                  book['image'],
+                                  height: 56,
+                                  width: 56,
+                                  fit: BoxFit.cover,
+                                )
+                                : Container(
+                                  height: 56,
+                                  width: 56,
+                                  color: AppColors.borderGrey,
+                                  child: Icon(
+                                    Icons.book,
+                                    color: AppColors.text,
                                   ),
                                 ),
-                                SizedBox(width: 2),
-                              ],
-                            ),
-                          chat['lastMessage'] != null &&
-                                  imgurRegex.hasMatch(chat['lastMessage']!)
-                              ? Row(
-                                  children: [
-                                    Transform.translate(
-                                      offset: const Offset(0, 1),
-                                      child: SvgPicture.asset(
-                                        "assets/icons/image-svgrepo-com.svg",
-                                        height: 20,
-                                        width: 20,
-                                        colorFilter: ColorFilter.mode(
-                                          AppColors.text.withOpacity(0.75),
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 2),
-                                    Text(
-                                      displayMessage(chat['lastMessage']),
-                                      style: TextStyle(
-                                        color:
-                                            AppColors.text.withOpacity(0.75),
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Expanded(
+                      ),
+                      title: Text(
+                        book['title'] ?? '',
+                        style: TextStyle(
+                          color: AppColors.text,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        "${book['price'].toString()} €",
+                        style: TextStyle(
+                          color: AppColors.text.withOpacity(0.75),
+                          fontSize: 16,
+                        ),
+                      ),
+                      trailing: SvgPicture.asset(
+                        "assets/icons/arrow-right.svg",
+                        height: 18,
+                        width: 18,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.text.withOpacity(0.5),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      onTap: () {
+                        //TODO
+                      },
+                    );
+                  }
+
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          top: 8,
+                          bottom: 8,
+                        ),
+                        child: Text(
+                          formatDate(chat['time']),
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                            color: AppColors.text.withOpacity(0.85),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: UserAvatar(
+                          avatar:
+                              chat['avatar'] is String
+                                  ? chat['avatar']
+                                  : chat['username'][0],
+                          fallbackText: chat['username'][0].toUpperCase(),
+                          radius: 22,
+                          showOnline: true,
+                          online: chat['online'] ?? false,
+                        ),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
                                   child: Text(
-                                    chat['lastMessage']!,
+                                    chat['username'],
                                     style: TextStyle(
-                                      color: AppColors.text.withOpacity(0.75),
-                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.text,
                                       fontSize: 14,
                                       height: 1,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                        ],
+                                SizedBox(width: 4),
+                                if (!(chat['seen'] ?? true) &&
+                                    !(chat['isMe'] ?? false))
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: AppColors.primary,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "nuovi messaggi",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          height: 1,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              height: 18,
+                              child: Row(
+                                children: [
+                                  if ((chat['seen'] ?? true) &&
+                                      (chat['isMe'] ?? true))
+                                    Row(
+                                      children: [
+                                        Center(
+                                          child: Transform.translate(
+                                            offset: const Offset(0, 1),
+                                            child: SvgPicture.asset(
+                                              "assets/icons/seen-svgrepo-com.svg",
+                                              height: 20,
+                                              width: 20,
+                                              colorFilter: ColorFilter.mode(
+                                                AppColors.primary,
+                                                BlendMode.srcIn,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 2),
+                                      ],
+                                    ),
+                                  chat['lastMessage'] != null &&
+                                          imgurRegex.hasMatch(
+                                            chat['lastMessage']!,
+                                          )
+                                      ? Row(
+                                        children: [
+                                          Transform.translate(
+                                            offset: const Offset(0, 1),
+                                            child: SvgPicture.asset(
+                                              "assets/icons/image-svgrepo-com.svg",
+                                              height: 20,
+                                              width: 20,
+                                              colorFilter: ColorFilter.mode(
+                                                AppColors.text.withOpacity(
+                                                  0.75,
+                                                ),
+                                                BlendMode.srcIn,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            displayMessage(chat['lastMessage']),
+                                            style: TextStyle(
+                                              color: AppColors.text.withOpacity(
+                                                0.75,
+                                              ),
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                      : Expanded(
+                                        child: Text(
+                                          chat['lastMessage']!,
+                                          style: TextStyle(
+                                            color: AppColors.text.withOpacity(
+                                              0.75,
+                                            ),
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 14,
+                                            height: 1,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        trailing: SvgPicture.asset(
+                          "assets/icons/arrow-right.svg",
+                          height: 18,
+                          width: 18,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.text.withOpacity(0.5),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => ChatPage(
+                                    chatId: chat['chatId'],
+                                    username: chat['username'],
+                                    avatar:
+                                        chat['avatar'] is String
+                                            ? chat['avatar']
+                                            : chat['username'][0],
+                                    book: chat['book'],
+                                  ),
+                            ),
+                          );
+                          await loadChats();
+                        },
                       ),
-                    ),
-                  ],
-                ),
-                trailing: SvgPicture.asset(
-                  "assets/icons/arrow-right.svg",
-                  height: 18,
-                  width: 18,
-                  colorFilter: ColorFilter.mode(
-                    AppColors.text.withOpacity(0.5),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatPage(
-                        chatId: chat['chatId'],
-                        username: chat['username'],
-                        avatar: chat['avatar'] is String
-                            ? chat['avatar']
-                            : chat['username'][0],
-                        book: chat['book'],
-                      ),
-                    ),
+                    ],
                   );
-                  await loadChats();
                 },
               ),
-            ],
-          );
-        },
-      ),
     );
   }
 }
@@ -701,7 +716,7 @@ class _InboxPageState extends State<InboxPage> with WidgetsBindingObserver {
 class ChatPage extends StatefulWidget {
   String chatId;
   final String username;
-  final dynamic avatar;
+  dynamic avatar;
   final Map<String, dynamic>? book;
   final VoidCallback? onChatOpened;
 
@@ -741,6 +756,7 @@ class _ChatPageState extends State<ChatPage> {
     widget.onChatOpened?.call();
 
     _loadMessages();
+    _loadSenderProfile();
     _checkMessagesTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
       if (!_isLoading && mounted) {
         await _checkNewMessages();
@@ -763,6 +779,32 @@ class _ChatPageState extends State<ChatPage> {
         _loadMessages(loadOlder: true);
       }
     });
+  }
+
+  Future<void> _loadSenderProfile() async {
+    if (widget.avatar != null) return;
+
+    final token = await storage.read(key: 'session_token');
+    if (token == null) return;
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://cornaro-backend.onrender.com/profile/${widget.username}',
+        ),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("response: $response, ${widget.username}");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          widget.avatar = data['profileImage'] ?? '';
+        });
+      } else {}
+    } catch (e) {}
   }
 
   @override
@@ -1157,10 +1199,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: AppColors.borderGrey,
-          ),
+          child: Container(height: 1, color: AppColors.borderGrey),
         ),
         actions: [
           IconButton(
@@ -1168,10 +1207,7 @@ class _ChatPageState extends State<ChatPage> {
               'assets/icons/info.svg',
               width: 22,
               height: 22,
-              colorFilter: ColorFilter.mode(
-                AppColors.text,
-                BlendMode.srcIn,
-              ),
+              colorFilter: ColorFilter.mode(AppColors.text, BlendMode.srcIn),
             ),
             onPressed: () {
               //TODO
@@ -1339,18 +1375,17 @@ class _ChatPageState extends State<ChatPage> {
                       remainingText = message['text'];
                     }
 
-                    final nextMessage =
-                        index > 0 ? _messages[index - 1] : null;
+                    final nextMessage = index > 0 ? _messages[index - 1] : null;
 
-                    final nextIsMeVisual = nextMessage != null
-                        ? (nextMessage['isMe']?.toString().toLowerCase() == 'true')
-                        : null;
+                    final nextIsMeVisual =
+                        nextMessage != null
+                            ? (nextMessage['isMe']?.toString().toLowerCase() ==
+                                'true')
+                            : null;
 
-                    final bool isLastMine =
-                        isMe && (nextIsMe != true);
+                    final bool isLastMine = isMe && (nextIsMe != true);
 
-                    final bool isLastHis =
-                        !isMe && (nextIsMe != false);
+                    final bool isLastHis = !isMe && (nextIsMe != false);
 
                     return Column(
                       children: [
@@ -1378,10 +1413,12 @@ class _ChatPageState extends State<ChatPage> {
                               Transform.translate(
                                 offset: const Offset(0, -2),
                                 child: UserAvatar(
-                                  avatar: widget.avatar is String
-                                      ? widget.avatar
-                                      : widget.username[0].toUpperCase(),
-                                  fallbackText: widget.username[0].toUpperCase(),
+                                  avatar:
+                                      widget.avatar is String
+                                          ? widget.avatar
+                                          : widget.username[0].toUpperCase(),
+                                  fallbackText:
+                                      widget.username[0].toUpperCase(),
                                   radius: 16,
                                 ),
                               )
@@ -1392,7 +1429,11 @@ class _ChatPageState extends State<ChatPage> {
                               child: Container(
                                 constraints: BoxConstraints(
                                   maxWidth:
-                                    isMe ? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.75,
+                                      isMe
+                                          ? MediaQuery.of(context).size.width *
+                                              0.8
+                                          : MediaQuery.of(context).size.width *
+                                              0.75,
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 8,
@@ -1401,7 +1442,7 @@ class _ChatPageState extends State<ChatPage> {
                                 margin: EdgeInsets.only(
                                   /* top: (isLastMine == true || isLastHis == true ) ? 12 : 3, */
                                   top: 1.5,
-                                  bottom: 1.5
+                                  bottom: 1.5,
                                 ),
                                 /* margin: EdgeInsets.all(3), */
                                 decoration: BoxDecoration(
@@ -1764,8 +1805,7 @@ class UserAvatar extends StatelessWidget {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color:
-                        online ? AppColors.green : Colors.transparent,
+                    color: online ? AppColors.green : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),

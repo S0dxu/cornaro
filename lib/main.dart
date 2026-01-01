@@ -2,17 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cornaro/pages/home.dart';
+import 'package:cornaro/pages/inbox.dart';
 import 'package:cornaro/pages/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cornaro/api/firebase_api.dart';
 import 'package:cornaro/firebase_options.dart';
 import 'package:cornaro/theme.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final storage = FlutterSecureStorage();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    if (message.data['chatId'] != null) {
+      await storage.write(key: 'openInbox', value: 'true');
+    }
+  });
 
   final token = await storage.read(key: 'session_token');
 
@@ -58,6 +67,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
+      home: HomePage(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Poppins',
@@ -103,7 +114,7 @@ class _MyAppState extends State<MyApp> {
           bodyMedium: TextStyle(color: AppColors.text),
         ),
       ),
-      home: widget.initialPage,
+      /* home: widget.initialPage, */
     );
   }
 }

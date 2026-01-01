@@ -63,11 +63,7 @@ String _resolveIconPath(String basePath, bool selected) {
   final dotIndex = basePath.lastIndexOf('.');
   if (dotIndex == -1) return basePath;
 
-  return basePath.replaceRange(
-    dotIndex,
-    dotIndex,
-    '_full',
-  );
+  return basePath.replaceRange(dotIndex, dotIndex, '_full');
 }
 
 class HomePage extends StatefulWidget {
@@ -106,7 +102,22 @@ class _HomePageState extends State<HomePage> {
     ];
 
     _loadUserData();
+    _checkOpenInboxFromNotification();
     _checkUnreadMessages();
+  }
+
+  Future<void> _checkOpenInboxFromNotification() async {
+    final openInbox = await storage.read(key: 'openInbox');
+
+    if (openInbox == 'true') {
+      await storage.delete(key: 'openInbox');
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+           _selectedIndex = 2;
+        });
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -368,9 +379,7 @@ class _BottomBar extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: selected
-                      ? primaryColor
-                      : textColor.withOpacity(0.75),
+                  color: selected ? primaryColor : textColor.withOpacity(0.75),
                 ),
               ),
             ),
@@ -542,7 +551,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     super.initState();
     _contactsPageController = PageController(
-      viewportFraction: 0.85,
+      viewportFraction: 1,
       initialPage: widget.initialCardIndex,
     );
     SystemChrome.setSystemUIOverlayStyle(
@@ -945,7 +954,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
+                                horizontal: 16,
                               ),
                               /* child: Material(
                                 color: AppColors.contrast,
@@ -972,7 +981,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                       ),
                                     ), */
                               child: Container(
-                                margin: const EdgeInsets.all(3),
+                                margin: const EdgeInsets.symmetric(vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppColors.contrast,
                                   borderRadius: BorderRadius.circular(16),
@@ -995,7 +1004,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                                             bottomLeft: Radius.circular(16),
                                           ),
                                         ),
-                                        padding: const EdgeInsets.only(top: 12, left: 12, bottom: 12),
+                                        padding: const EdgeInsets.only(
+                                          top: 12,
+                                          left: 12,
+                                          bottom: 12,
+                                        ),
                                         child: Image.asset(
                                           contactImages[index],
                                           fit: BoxFit.cover,
@@ -1253,7 +1266,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                   border: Border(
                                     bottom: BorderSide(
                                       color: AppColors.borderGrey,
-                                      width: 1,
+                                      width: 0.5,
                                     ),
                                   ),
                                 ),
@@ -1399,24 +1412,42 @@ class _HomeWidgetState extends State<HomeWidget> {
                                                       height: size,
                                                       color: AppColors.bgGrey,
                                                       child: InteractiveViewer(
-                                                        child: widget.profileImage.isNotEmpty && widget.profileImage != null
-                                                        ? Image.network(
-                                                          widget.profileImage,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                        : 
-                                                        CircleAvatar(
-                                                          radius: size / 2,
-                                                          backgroundColor: AppColors.borderGrey,
-                                                          child: Text(
-                                                            widget.name[0].toUpperCase(),
-                                                            style: TextStyle(
-                                                              color: AppColors.text,
-                                                              fontWeight: FontWeight.w400,
-                                                              fontSize: size / 2,
-                                                            ),
-                                                          ),
-                                                        ),
+                                                        child:
+                                                            widget
+                                                                        .profileImage
+                                                                        .isNotEmpty &&
+                                                                    widget.profileImage !=
+                                                                        null
+                                                                ? Image.network(
+                                                                  widget
+                                                                      .profileImage,
+                                                                  fit:
+                                                                      BoxFit
+                                                                          .cover,
+                                                                )
+                                                                : CircleAvatar(
+                                                                  radius:
+                                                                      size / 2,
+                                                                  backgroundColor:
+                                                                      AppColors
+                                                                          .borderGrey,
+                                                                  child: Text(
+                                                                    widget
+                                                                        .name[0]
+                                                                        .toUpperCase(),
+                                                                    style: TextStyle(
+                                                                      color:
+                                                                          AppColors
+                                                                              .text,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400,
+                                                                      fontSize:
+                                                                          size /
+                                                                          2,
+                                                                    ),
+                                                                  ),
+                                                                ),
                                                       ),
                                                     ),
                                                   ),
@@ -1745,7 +1776,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                         activeColor: AppColors.primary,
                                         onChanged: (bool value) {
                                           setState(() {
-                                            selectedTheme = value ? "dark" : "light";
+                                            selectedTheme =
+                                                value ? "dark" : "light";
                                             _toggleTheme(selectedTheme);
                                           });
                                         },
@@ -2285,7 +2317,7 @@ class _ViewPageState extends State<ViewPage> {
               border: Border(
                 bottom: BorderSide(
                   color: AppColors.text.withOpacity(0.15),
-                  width: 1,
+                  width: 0.5,
                 ),
               ),
             ),
@@ -2844,7 +2876,7 @@ class _ViewPageState extends State<ViewPage> {
                                 border: Border(
                                   bottom: BorderSide(
                                     color: AppColors.borderGrey,
-                                    width: 1,
+                                    width: 0.5,
                                   ),
                                 ),
                               ),
